@@ -1,0 +1,181 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: healthcare-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - hc_net
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: healthcare-gateway
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      PATIENT_SERVICE_URL: "http://patient-service:3001"
+      DOCTOR_SERVICE_URL: "http://doctor-service:3002"
+      APPOINTMENT_SERVICE_URL: "http://appointment-service:3003"
+      TELEMEDICINE_SERVICE_URL: "http://telemedicine-service:3004"
+      PAYMENT_SERVICE_URL: "http://payment-service:3005"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:3006"
+    depends_on:
+      - mongo
+      - patient-service
+      - doctor-service
+      - appointment-service
+      - telemedicine-service
+      - payment-service
+      - notification-service
+    ports:
+      - "3000:3000"
+    networks:
+      - hc_net
+
+  patient-service:
+    build:
+      context: .
+      dockerfile: services/patient-service/Dockerfile
+    container_name: healthcare-patient-service
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "patient_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      ALLOW_ADMIN_REGISTER: "false"
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@local.test}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin12345}"
+      UPLOAD_DIR: "/app/uploads"
+      DOCTOR_SERVICE_URL: "http://doctor-service:3002"
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3001"
+    networks:
+      - hc_net
+
+  doctor-service:
+    build:
+      context: .
+      dockerfile: services/doctor-service/Dockerfile
+    container_name: healthcare-doctor-service
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "doctor_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      APPOINTMENT_SERVICE_URL: "http://appointment-service:3003"
+      PATIENT_SERVICE_URL: "http://patient-service:3001"
+    depends_on:
+      - mongo
+    ports:
+      - "3002:3002"
+    networks:
+      - hc_net
+
+  appointment-service:
+    build:
+      context: .
+      dockerfile: services/appointment-service/Dockerfile
+    container_name: healthcare-appointment-service
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "appointment_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      DOCTOR_SERVICE_URL: "http://doctor-service:3002"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:3006"
+    depends_on:
+      - mongo
+    ports:
+      - "3003:3003"
+    networks:
+      - hc_net
+
+  telemedicine-service:
+    build:
+      context: .
+      dockerfile: services/telemedicine-service/Dockerfile
+    container_name: healthcare-telemedicine-service
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "telemedicine_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      TELEMEDICINE_SECRET: "${TELEMEDICINE_SECRET:-telemed_change_me}"
+    depends_on:
+      - mongo
+    ports:
+      - "3004:3004"
+    networks:
+      - hc_net
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    container_name: healthcare-payment-service
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "payment_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-webhook_change_me}"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:3006"
+    depends_on:
+      - mongo
+    ports:
+      - "3005:3005"
+    networks:
+      - hc_net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: healthcare-notification-service
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "notification_db"
+      JWT_SECRET: "${JWT_SECRET:-dev_change_me}"
+      INTERNAL_SERVICE_TOKEN: "${INTERNAL_SERVICE_TOKEN:-internal_dev_change_me}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      FROM_EMAIL: "${FROM_EMAIL:-no-reply@example.test}"
+      SMS_SENDER: "${SMS_SENDER:-HealthSys}"
+      PATIENT_SERVICE_URL: "http://patient-service:3001"
+    depends_on:
+      - mongo
+    ports:
+      - "3006:3006"
+    networks:
+      - hc_net
+
+networks:
+  hc_net:
+
+volumes:
+  mongo_data:
+

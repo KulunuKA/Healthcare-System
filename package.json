@@ -1,0 +1,16 @@
+{
+  "name": "healthcare-system-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Production-ready Express microservices monorepo (MongoDB + API Gateway)",
+  "workspaces": [
+    "gateway",
+    "services/*",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "echo \"Use docker-compose for multi-service dev\"",
+    "start": "docker compose up --build"
+  }
+}
+

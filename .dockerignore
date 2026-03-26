@@ -1,0 +1,9 @@
+frontend
+**/node_modules
+**/.env
+**/.git
+**/.cursor
+**/terminals
+**/agent-transcripts
+*.log
+
