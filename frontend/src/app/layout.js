@@ -1,3 +1,4 @@
+import { PatientProvider } from "@/context/PatientProvider";
 import "./globals.css";
 import LayoutClient from "./LayoutClient";
 
@@ -10,7 +11,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <LayoutClient>{children}</LayoutClient>
+        <LayoutClient>
+          <PatientProvider>{children}</PatientProvider>
+        </LayoutClient>
       </body>
     </html>
   );

@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 
 export default function LayoutClient({ children }) {
   const pathname = usePathname();
-  console.log(pathname)
 
-  const hideNavbar = ["/login", "/register"];
+  const hideNavbar = ["/login", "/register/doctor", "/register/patient"];
 
   return (
     <div className="flex min-h-screen flex-col">
