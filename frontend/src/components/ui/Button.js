@@ -70,6 +70,7 @@ export default function Button({
         e.currentTarget.style.transform = "scale(1)";
       }}
     >
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       {loading ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : null}
       {children}
     </button>

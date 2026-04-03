@@ -5,7 +5,7 @@ import { message } from "antd";
 /*
     @TODO: Change to the local API URL after testing
 */
-export const API_BASE_URL = "http://localhost:3001";
+export const API_BASE_URL = "http://localhost:3000";
 
 let refreshFlag = true;
 
@@ -87,29 +87,11 @@ const errorHandler = async (error) => {
         console.error("❌ Error clearing preferences:", clearError);
       }
 
-      // Only redirect if we're in a browser environment
-      if (typeof window !== "undefined") {
-        // Determine redirect path based on platform
-        const isMobile = Capacitor.getPlatform() !== "web";
-        const redirectPath = isMobile ? "/" : "/login";
-
-        // Check if we're already on the target page to avoid redirect loops
-        const currentPath = window.location.pathname;
-        const isAlreadyOnTarget = isMobile
-          ? currentPath === "/"
-          : currentPath === "/login" || currentPath.startsWith("/login");
-
-        if (!isAlreadyOnTarget) {
-          console.log(
-            `🔄 Redirecting to ${redirectPath} (${isMobile ? "mobile" : "web"})`,
-          );
-          // Use replace for better reliability in Capacitor WebViews
-          window.location.replace(redirectPath);
-        } else {
-          console.log(`ℹ️ Already on ${currentPath}, skipping redirect`);
-        }
-      }
-
+     // Redirect to login page
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1000);
+      
       // Reset refreshFlag after a delay to allow future 401 handling
       setTimeout(() => {
         refreshFlag = true;
