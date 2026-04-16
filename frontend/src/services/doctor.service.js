@@ -47,6 +47,14 @@ export function appointmentDecisionAPI(token, appointmentId, status) {
   );
 }
 
+export function getDoctorAppointmentsAPI(token) {
+  const APPOINTMENT_API_BASE = "/api/appointments";
+  return axiosInstance.get(
+    `${APPOINTMENT_API_BASE}/appointments`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
 // ─── Patient Reports ─────────────────────────────────
 export function viewPatientReportsAPI(token, patientId) {
   return axiosInstance.get(`${API_BASE_URL}/patients/${patientId}/reports`, {

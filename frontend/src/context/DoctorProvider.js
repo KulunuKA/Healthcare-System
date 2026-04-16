@@ -10,6 +10,7 @@ import {
   updateDoctorProfileAPI,
   setAvailabilityAPI,
   appointmentDecisionAPI,
+  getDoctorAppointmentsAPI,
   issuePrescriptionAPI,
   viewPatientReportsAPI,
 } from "@/services/doctor.service";
@@ -22,6 +23,8 @@ export const DoctorProvider = ({ children }) => {
   const { setUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   const getToken = () => getSessionValue("accessToken");
 
@@ -119,12 +122,29 @@ export const DoctorProvider = ({ children }) => {
     try {
       const token = getToken();
       const res = await appointmentDecisionAPI(token, appointmentId, status);
+      // Refresh appointments after decision
+      await fetchDoctorAppointments();
       return res.data;
     } catch (err) {
       console.error("Appointment decision failed:", err);
       throw err;
     }
   };
+
+  const fetchDoctorAppointments = useCallback(async () => {
+    setLoadingAppointments(true);
+    try {
+      const token = getToken();
+      const res = await getDoctorAppointmentsAPI(token);
+      setAppointments(res.data.data || []);
+      return res.data.data || [];
+    } catch (err) {
+      console.error("Failed to fetch appointments:", err);
+      throw err;
+    } finally {
+      setLoadingAppointments(false);
+    }
+  }, []);
 
   // ─── Prescriptions ──────────────────────────────
   const issuePrescription = async ({ patientId, medications, notes }) => {
@@ -155,12 +175,15 @@ export const DoctorProvider = ({ children }) => {
       value={{
         profile,
         loadingProfile,
+        appointments,
+        loadingAppointments,
         registerDoctor,
         loginDoctor,
         fetchProfile,
         updateProfile,
         updateAvailability,
         decideAppointment,
+        fetchDoctorAppointments,
         issuePrescription,
         fetchPatientReports,
       }}
