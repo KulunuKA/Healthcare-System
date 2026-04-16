@@ -1,5 +1,12 @@
 "use client";
-import { registerPatientAPI, loginPatientAPI, getDoctorsBySpecialtyAPI, bookAppointmentAPI, getPatientAppointmentsAPI, cancelAppointmentAPI } from "@/services/patient.service";
+import {
+  registerPatientAPI,
+  loginPatientAPI,
+  getDoctorsBySpecialtyAPI,
+  bookAppointmentAPI,
+  getPatientAppointmentsAPI,
+  cancelAppointmentAPI,
+} from "@/services/patient.service";
 import { setSession, getSessionValue } from "@/utils/session";
 import { createContext, useContext, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -91,7 +98,9 @@ export const PatientProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       console.error("Error booking appointment:", error);
-      throw error.response?.data || error.message || "Failed to book appointment";
+      throw (
+        error.response?.data || error.message || "Failed to book appointment"
+      );
     }
   };
 
@@ -119,23 +128,27 @@ export const PatientProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       console.error("Error cancelling appointment:", error);
-      throw error.response?.data || error.message || "Failed to cancel appointment";
+      throw (
+        error.response?.data || error.message || "Failed to cancel appointment"
+      );
     }
   };
 
   return (
-    <PatientContext.Provider value={{ 
-      registerPatient, 
-      loginPatient,
-      fetchDoctorsBySpecialty,
-      bookAppointment,
-      fetchPatientAppointments,
-      cancelAppointment,
-      appointments,
-      doctors,
-      loadingAppointments,
-      loadingDoctors,
-    }}>
+    <PatientContext.Provider
+      value={{
+        registerPatient,
+        loginPatient,
+        fetchDoctorsBySpecialty,
+        bookAppointment,
+        fetchPatientAppointments,
+        cancelAppointment,
+        appointments,
+        doctors,
+        loadingAppointments,
+        loadingDoctors,
+      }}
+    >
       {children}
     </PatientContext.Provider>
   );

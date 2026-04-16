@@ -1,16 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Form, Input, Button, DatePicker, TimePicker, Card, Alert, Spin, message } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  DatePicker,
+  TimePicker,
+  Card,
+  Alert,
+  Spin,
+  message,
+} from "antd";
 import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-export default function AppointmentBookingForm({ 
-  doctorId, 
-  doctorName, 
-  specialty, 
-  onSubmit, 
-  loading = false 
+export default function AppointmentBookingForm({
+  doctorId,
+  doctorName,
+  specialty,
+  onSubmit,
+  loading = false,
 }) {
   const [form] = Form.useForm();
   const [selectedDate, setSelectedDate] = useState(null);
@@ -50,7 +60,9 @@ export default function AppointmentBookingForm({
 
   return (
     <Card style={{ maxWidth: "500px", margin: "0 auto" }}>
-      <h2 style={{ marginBottom: "20px", fontSize: "24px", fontWeight: "bold" }}>
+      <h2
+        style={{ marginBottom: "20px", fontSize: "24px", fontWeight: "bold" }}
+      >
         Book Appointment with Dr. {doctorName}
       </h2>
 
@@ -88,7 +100,11 @@ export default function AppointmentBookingForm({
 
           {/* Date Selection */}
           <Form.Item
-            label={<><CalendarOutlined /> Select Date</>}
+            label={
+              <>
+                <CalendarOutlined /> Select Date
+              </>
+            }
             required
           >
             <DatePicker
@@ -104,7 +120,11 @@ export default function AppointmentBookingForm({
 
           {/* Time Selection */}
           <Form.Item
-            label={<><ClockCircleOutlined /> Select Time</>}
+            label={
+              <>
+                <ClockCircleOutlined /> Select Time
+              </>
+            }
             required
           >
             <TimePicker
@@ -117,10 +137,7 @@ export default function AppointmentBookingForm({
           </Form.Item>
 
           {/* Additional Notes */}
-          <Form.Item
-            label="Additional Notes (Optional)"
-            name="notes"
-          >
+          <Form.Item label="Additional Notes (Optional)" name="notes">
             <Input.TextArea
               placeholder="Any additional information for the doctor"
               rows={3}
@@ -137,7 +154,8 @@ export default function AppointmentBookingForm({
               }}
             >
               <p style={{ margin: "5px 0" }}>
-                <strong>Date:</strong> {selectedDate.format("dddd, MMMM DD, YYYY")}
+                <strong>Date:</strong>{" "}
+                {selectedDate.format("dddd, MMMM DD, YYYY")}
               </p>
               <p style={{ margin: "5px 0" }}>
                 <strong>Time:</strong> {selectedTime.format("HH:mm")}

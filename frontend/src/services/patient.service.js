@@ -37,10 +37,9 @@ export function bookAppointmentAPI(token, appointmentData) {
 }
 
 export function getPatientAppointmentsAPI(token) {
-  return axiosInstance.get(
-    `${APPOINTMENT_API_BASE}/appointments`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+  return axiosInstance.get(`${APPOINTMENT_API_BASE}/appointments`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export function getAppointmentDetailAPI(token, appointmentId) {

@@ -10,7 +10,7 @@ export default function NewAppointmentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { bookAppointment, doctors } = usePatient();
-  
+
   const [loading, setLoading] = useState(false);
   const [doctor, setDoctor] = useState(null);
   const [loadingDoctor, setLoadingDoctor] = useState(true);
@@ -53,20 +53,24 @@ export default function NewAppointmentPage() {
   if (!doctor) {
     return (
       <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <Empty
-          description="Doctor not found"
-          style={{ marginTop: "50px" }}
-        />
+        <Empty description="Doctor not found" style={{ marginTop: "50px" }} />
       </div>
     );
   }
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "30px", textAlign: "center", fontSize: "32px", fontWeight: "bold" }}>
+      <h1
+        style={{
+          marginBottom: "30px",
+          textAlign: "center",
+          fontSize: "32px",
+          fontWeight: "bold",
+        }}
+      >
         Schedule Your Appointment
       </h1>
-      
+
       <AppointmentBookingForm
         doctorId={doctor._id || doctor.id}
         doctorName={doctor.fullName}

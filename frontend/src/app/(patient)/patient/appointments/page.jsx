@@ -1,8 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Tag, Empty, Spin, Modal, message, Tooltip, Badge } from "antd";
-import { CalendarOutlined, ClockCircleOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  Card,
+  Button,
+  Tag,
+  Empty,
+  Spin,
+  Modal,
+  message,
+  Tooltip,
+  Badge,
+} from "antd";
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
 import Link from "next/link";
 import dayjs from "dayjs";
@@ -27,7 +42,12 @@ const statusLabels = {
 };
 
 export default function AppointmentsPage() {
-  const { fetchPatientAppointments, cancelAppointment, appointments, loadingAppointments } = usePatient();
+  const {
+    fetchPatientAppointments,
+    cancelAppointment,
+    appointments,
+    loadingAppointments,
+  } = usePatient();
   const [loading, setLoading] = useState(true);
   const [cancelingId, setCancelingId] = useState(null);
 
@@ -71,7 +91,9 @@ export default function AppointmentsPage() {
   };
 
   const canCancel = (appointment) => {
-    return appointment.status !== "cancelled" && appointment.status !== "completed";
+    return (
+      appointment.status !== "cancelled" && appointment.status !== "completed"
+    );
   };
 
   if (loading) {
@@ -84,7 +106,14 @@ export default function AppointmentsPage() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "1000px", margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "30px",
+        }}
+      >
         <h1 style={{ fontSize: "32px", fontWeight: "bold", margin: 0 }}>
           <CalendarOutlined style={{ marginRight: "10px" }} />
           My Appointments
@@ -102,7 +131,13 @@ export default function AppointmentsPage() {
           style={{ marginTop: "50px" }}
         />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+            gap: "20px",
+          }}
+        >
           {appointments.map((appointment) => (
             <Card
               key={appointment._id || appointment.id}
@@ -116,8 +151,17 @@ export default function AppointmentsPage() {
             >
               {/* Header */}
               <div style={{ marginBottom: "15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "10px" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "start",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <h3
+                    style={{ fontSize: "18px", fontWeight: "bold", margin: 0 }}
+                  >
                     Dr. {appointment.doctorId?.fullName || "Unknown"}
                   </h3>
                   <Tag color={statusColors[appointment.status]}>
@@ -131,21 +175,42 @@ export default function AppointmentsPage() {
 
               {/* Details */}
               <div style={{ marginBottom: "15px", flex: 1 }}>
-                <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
-                  <CalendarOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-                  <strong>Date:</strong> {dayjs(appointment.startAt).format("MMM DD, YYYY")}
+                <p
+                  style={{
+                    margin: "8px 0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <CalendarOutlined
+                    style={{ marginRight: "8px", color: "#1890ff" }}
+                  />
+                  <strong>Date:</strong>{" "}
+                  {dayjs(appointment.startAt).format("MMM DD, YYYY")}
                 </p>
-                <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
-                  <ClockCircleOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-                  <strong>Time:</strong> {dayjs(appointment.startAt).format("HH:mm")}
+                <p
+                  style={{
+                    margin: "8px 0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <ClockCircleOutlined
+                    style={{ marginRight: "8px", color: "#1890ff" }}
+                  />
+                  <strong>Time:</strong>{" "}
+                  {dayjs(appointment.startAt).format("HH:mm")}
                 </p>
                 {appointment.reason && (
-                  <p style={{ margin: "8px 0", color: "#666", fontSize: "14px" }}>
+                  <p
+                    style={{ margin: "8px 0", color: "#666", fontSize: "14px" }}
+                  >
                     <strong>Reason:</strong> {appointment.reason}
                   </p>
                 )}
                 <p style={{ margin: "8px 0", color: "#999", fontSize: "12px" }}>
-                  <strong>Booked:</strong> {dayjs(appointment.createdAt).fromNow()}
+                  <strong>Booked:</strong>{" "}
+                  {dayjs(appointment.createdAt).fromNow()}
                 </p>
               </div>
 
@@ -175,7 +240,8 @@ export default function AppointmentsPage() {
                   }}
                 >
                   <p style={{ margin: 0, color: "#274e0f", fontSize: "13px" }}>
-                    ✓ This appointment is confirmed. Doctor will see you on the scheduled date/time.
+                    ✓ This appointment is confirmed. Doctor will see you on the
+                    scheduled date/time.
                   </p>
                 </Card>
               )}
@@ -195,8 +261,12 @@ export default function AppointmentsPage() {
                     icon={<DeleteOutlined />}
                     danger
                     block
-                    loading={cancelingId === (appointment._id || appointment.id)}
-                    onClick={() => handleCancelAppointment(appointment._id || appointment.id)}
+                    loading={
+                      cancelingId === (appointment._id || appointment.id)
+                    }
+                    onClick={() =>
+                      handleCancelAppointment(appointment._id || appointment.id)
+                    }
                   >
                     Cancel
                   </Button>

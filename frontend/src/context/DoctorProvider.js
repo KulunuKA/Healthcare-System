@@ -150,7 +150,11 @@ export const DoctorProvider = ({ children }) => {
   const issuePrescription = async ({ patientId, medications, notes }) => {
     try {
       const token = getToken();
-      const res = await issuePrescriptionAPI(token, { patientId, medications, notes });
+      const res = await issuePrescriptionAPI(token, {
+        patientId,
+        medications,
+        notes,
+      });
       return res.data;
     } catch (err) {
       console.error("Issue prescription failed:", err);
