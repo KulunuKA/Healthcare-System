@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Button from "@/components/ui/Button";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -47,19 +48,12 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="rounded-lg border border-[var(--primary-blue)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--primary-blue)] transition-colors duration-200 hover:bg-[var(--hero-bg)]"
-          >
+          <Button href="/login" variant="outline">
             Login
-          </Link>
-          <Link
-            href="/register/patient"
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity duration-200 hover:opacity-90"
-            style={{ backgroundColor: "var(--primary-blue)" }}
-          >
+          </Button>
+          <Button href="/register/patient">
             Get Started
-          </Link>
+          </Button>
         </div>
       </div>
     </header>
