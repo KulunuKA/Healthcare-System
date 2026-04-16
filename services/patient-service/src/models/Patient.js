@@ -10,6 +10,12 @@ const PatientSchema = new mongoose.Schema(
       phone: { type: String, default: "" },
       gender: { type: String, default: "" },
       dateOfBirth: { type: Date },
+      address: {
+        street: { type: String, default: "" },
+        city: { type: String, default: "" },
+        state: { type: String, default: "" },
+        zip: { type: String, default: "" },
+      },
     },
     verifiedDoctors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Doctor" }],
   },
