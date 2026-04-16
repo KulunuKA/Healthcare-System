@@ -1,6 +1,4 @@
 import "./globals.css";
-import Navbar from "@/components/shared/navbar/navbar";
-import Footer from "@/components/shared/footer/footer";
 
 export const metadata = {
   title: "Smart Healthcare Platform",
@@ -9,13 +7,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col">
-        <Navbar />
-
-        <main className="flex-1">{children}</main>
-
-        <Footer />
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen" suppressHydrationWarning>
+        {children}
       </body>
     </html>
   );
