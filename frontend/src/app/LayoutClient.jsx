@@ -8,14 +8,15 @@ export default function LayoutClient({ children }) {
   const pathname = usePathname();
 
   const hideNavbar = ["/login", "/register/doctor", "/register/patient"];
+  const isDoctorDashboard = pathname.startsWith("/doctor");
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      {!isDoctorDashboard && <Navbar />}
 
       <main className="flex-1">{children}</main>
 
-      {!hideNavbar.includes(pathname) && <Footer />}
+      {!hideNavbar.includes(pathname) && !isDoctorDashboard && <Footer />}
     </div>
   );
 }
