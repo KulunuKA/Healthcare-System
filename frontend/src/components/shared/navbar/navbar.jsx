@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Button from "@/components/ui/Button";
 
 const navLinks = [
@@ -8,7 +11,14 @@ const navLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
+function isNavActive(href, pathname) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <header
       className="sticky top-0 z-50 w-full border-b backdrop-blur-md"
@@ -18,7 +28,6 @@ export default function Navbar() {
       }}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 text-xl font-bold"
@@ -33,27 +42,31 @@ export default function Navbar() {
           Medi<span style={{ color: "var(--primary-blue)" }}>Connect</span>
         </Link>
 
-        {/* Nav Links */}
         <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="text-sm font-medium text-[var(--text-gray)] transition-colors duration-200 hover:text-[var(--primary-blue)]"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isNavActive(link.href, pathname);
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`text-sm transition-colors duration-200 ${
+                  active
+                    ? "font-semibold text-[var(--primary-blue)]"
+                    : "font-medium text-[var(--text-gray)] hover:text-[var(--primary-blue)]"
+                }`}
+                aria-current={active ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* CTA Buttons */}
         <div className="flex items-center gap-3">
           <Button href="/login" variant="outline">
             Login
           </Button>
-          <Button href="/register/patient">
-            Get Started
-          </Button>
+          <Button href="/register/patient">Get Started</Button>
         </div>
       </div>
     </header>
