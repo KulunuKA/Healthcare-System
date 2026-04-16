@@ -8,9 +8,8 @@ import { useState } from "react";
 export default function PatientRegisterPage() {
   const { registerPatient } = usePatient();
   const [formData, setFormData] = useState({
-    name: "",
-    mobile: "",
-    address: "",
+    fullName: "",
+    phone: "",
     email: "",
     password: "",
   });
@@ -23,9 +22,8 @@ export default function PatientRegisterPage() {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.mobile.trim()) newErrors.mobile = "Mobile is required";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.fullName.trim()) newErrors.fullName = "Full Name is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone is required";
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     }
@@ -36,20 +34,21 @@ export default function PatientRegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      if (!validateForm()) return;
+      setIsSubmitting(true);
 
-    // Call the registerPatient function from the context
-    registerPatient(formData)
-      .then((data) => {
-        console.log("Patient registered successfully:", data);
-        // Handle successful registration (e.g., redirect or show a success message)
-      })
-      .catch((error) => {
-        console.error("Error registering patient:", error);
-        // Handle registration error (e.g., show an error message)
-      });
+      // Call the registerPatient function from the context
+      await registerPatient(formData);
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, main: error.message }));
+      console.error("Unexpected error during registration:", error);
+      // Handle unexpected errors (e.g., show a generic error message)
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,45 +79,38 @@ export default function PatientRegisterPage() {
         {/* Card */}
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 px-8 py-8">
           <form className="flex flex-col gap-5">
+            {/* main error */}
+            {errors.main && (
+              <div className="bg-red-100 text-red-700 px-4 py-2 rounded">
+                {errors.main}
+              </div>
+            )
+            }
             <div className="flex flex-col gap-1.5">
               <Input
                 type="text"
-                id="name"
-                label={"Name"}
-                value={formData.name}
-                placeholder="Enter Name"
+                id="fullName"
+                label={"Full Name"}
+                value={formData.fullName}
+                placeholder="Enter Full Name"
                 required
                 icon={User}
-                onChange={handleChange("name")}
-                error={errors.name}
+                onChange={handleChange("fullName")}
+                error={errors.fullName}
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Input
                 type="text"
-                id="mobile"
-                label={"Mobile"}
-                value={formData.mobile}
-                placeholder="Enter Mobile"
+                id="phone"
+                label={"Phone"}
+                value={formData.phone}
+                placeholder="Enter Phone Number"
                 required
                 icon={User}
-                onChange={handleChange("mobile")}
-                error={errors.mobile}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Input
-                type="text"
-                id="address"
-                label={"Address"}
-                value={formData.address}
-                placeholder="Enter your Home Address"
-                required
-                icon={Home}
-                onChange={handleChange("address")}
-                error={errors.address}
+                onChange={handleChange("phone")}
+                error={errors.phone}
               />
             </div>
 
@@ -150,7 +142,7 @@ export default function PatientRegisterPage() {
               />
             </div>
 
-            <Button type="submit" onClick={handleSubmit}>
+            <Button type="submit" onClick={handleSubmit} loading={isSubmitting}>
               Create Account
             </Button>
           </form>

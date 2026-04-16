@@ -18,7 +18,7 @@ function createApp() {
   app.use(requestId);
   app.use(logRequests);
 
-  app.get("/health", (req, res) => res.json({ success: true, message: "patient-service ok" }));
+  app.get("/auth/health", (req, res) => res.json({ success: true, message: "patient-service ok" }));
 
   // Auth
   app.use("/auth", authRoutes);
