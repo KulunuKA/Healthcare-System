@@ -172,9 +172,14 @@ export default function AppointmentsPage() {
                     >
                       {appointment.doctor?.fullName || "Unknown"}
                     </h3>
-                    <Tag color={statusColors[appointment.status]}>
-                      {statusLabels[appointment.status]}
-                    </Tag>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {appointment.isTelemedicineRequest ? (
+                        <Tag color="purple">Telemedicine</Tag>
+                      ) : null}
+                      <Tag color={statusColors[appointment.status]}>
+                        {statusLabels[appointment.status]}
+                      </Tag>
+                    </div>
                   </div>
                   <p
                     style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
@@ -185,32 +190,50 @@ export default function AppointmentsPage() {
 
                 {/* Details */}
                 <div style={{ marginBottom: "15px", flex: 1 }}>
-                  <p
-                    style={{
-                      margin: "8px 0",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <CalendarOutlined
-                      style={{ marginRight: "8px", color: "#1890ff" }}
-                    />
-                    <strong>Date:</strong>{" "}
-                    {dayjs(appointment.startAt).format("MMM DD, YYYY")}
-                  </p>
-                  <p
-                    style={{
-                      margin: "8px 0",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ClockCircleOutlined
-                      style={{ marginRight: "8px", color: "#1890ff" }}
-                    />
-                    <strong>Time:</strong>{" "}
-                    {dayjs(appointment.startAt).format("HH:mm")}
-                  </p>
+                  {appointment.startAt ? (
+                    <>
+                      <p
+                        style={{
+                          margin: "8px 0",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <CalendarOutlined
+                          style={{ marginRight: "8px", color: "#1890ff" }}
+                        />
+                        <strong>Date:</strong>{" "}
+                        {dayjs(appointment.startAt).format("MMM DD, YYYY")}
+                      </p>
+                      <p
+                        style={{
+                          margin: "8px 0",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <ClockCircleOutlined
+                          style={{ marginRight: "8px", color: "#1890ff" }}
+                        />
+                        <strong>Time:</strong>{" "}
+                        {dayjs(appointment.startAt).format("HH:mm")}
+                      </p>
+                    </>
+                  ) : (
+                    <p
+                      style={{
+                        margin: "8px 0",
+                        color: "#531dab",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <CalendarOutlined
+                        style={{ marginRight: "8px", color: "#722ed1" }}
+                      />
+                      <strong>Date & time:</strong> Pending — the doctor
+                      will confirm and send a meeting link.
+                    </p>
+                  )}
                   {appointment.reason && (
                     <p
                       style={{

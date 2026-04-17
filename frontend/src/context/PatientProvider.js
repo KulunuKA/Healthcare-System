@@ -4,6 +4,7 @@ import {
   loginPatientAPI,
   getDoctorsBySpecialtyAPI,
   bookAppointmentAPI,
+  createTelemedicineRequestAPI,
   getPatientAppointmentsAPI,
   cancelAppointmentAPI,
 } from "@/services/patient.service";
@@ -166,6 +167,25 @@ export const PatientProvider = ({ children }) => {
     }
   };
 
+  const submitTelemedicineRequest = async ({ doctorId, reason, notes }) => {
+    try {
+      const token = getToken();
+      const response = await createTelemedicineRequestAPI(token, {
+        doctorId,
+        reason,
+        notes,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error submitting telemedicine request:", error);
+      throw (
+        error.response?.data ||
+        error.message ||
+        "Failed to submit telemedicine request"
+      );
+    }
+  };
+
   const cancelAppointment = async (appointmentId) => {
     try {
       const token = getToken();
@@ -193,6 +213,7 @@ export const PatientProvider = ({ children }) => {
         bookAppointment,
         cancelAppointment,
         fetchDoctorsBySpecialty,
+        submitTelemedicineRequest,
       }}
     >
       {children}

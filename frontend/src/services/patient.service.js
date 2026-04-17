@@ -2,6 +2,8 @@ import axiosInstance from "./axiosInstance";
 
 const API_BASE_URL = "/api/patients";
 const APPOINTMENT_API_BASE = "/api/appointments";
+const DOCTOR_API_BASE = "/api/doctors";
+const TELEMEDICINE_API_BASE = "/api/telemedicine";
 const NOTIFICATION_API_BASE = "/api/notifications";
 
 // ─── Auth ────────────────────────────────────────────
@@ -27,6 +29,28 @@ export function getDoctorsBySpecialtyAPI(token, specialty) {
 export function searchDoctorsAPI(token, query) {
   return axiosInstance.get(`${APPOINTMENT_API_BASE}/doctors/search`, {
     params: { q: query },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/** Resolves a doctor when opening the booking page directly (no in-memory list). */
+export function getDoctorByIdAPI(token, doctorId) {
+  return axiosInstance.get(`${DOCTOR_API_BASE}/doctors/${doctorId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+}
+
+// ─── Telemedicine (telemedicine-service) ─────────────────
+export function createTelemedicineRequestAPI(token, { doctorId, reason, notes }) {
+  return axiosInstance.post(
+    `${TELEMEDICINE_API_BASE}/requests`,
+    { doctorId, reason, notes },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
+export function getMyTelemedicineRequestsAPI(token) {
+  return axiosInstance.get(`${TELEMEDICINE_API_BASE}/requests/mine`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
