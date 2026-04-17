@@ -77,6 +77,17 @@ export default function TelemedicineManagementSection() {
           : "—",
     },
     {
+      title: "Paid",
+      key: "paid",
+      width: 72,
+      render: (_, r) =>
+        r.paid ? (
+          <Tag color="green">Yes</Tag>
+        ) : (
+          <Tag>No</Tag>
+        ),
+    },
+    {
       title: "Meeting link",
       key: "link",
       ellipsis: true,

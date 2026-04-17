@@ -213,6 +213,18 @@
   border-color: rgba(148, 163, 184, 0.45);
 }
 
+.pillPaid {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.pillUnpaid {
+  background: rgba(245, 158, 11, 0.14);
+  color: #9a3412;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
 .cardInner {
   padding: 0 18px 18px 20px;
 }
@@ -474,6 +486,23 @@
   padding-inline: 14px !important;
   font-size: 13px !important;
   border-radius: 8px !important;
+}
+
+.cardPatient .payBtn {
+  height: 34px !important;
+  padding-inline: 14px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px -8px rgba(180, 83, 9, 0.55) !important;
+}
+
+.cardPatient .payBtn:hover {
+  color: #fff !important;
+  filter: brightness(1.06);
 }
 
 .cardPatient .linkHint {

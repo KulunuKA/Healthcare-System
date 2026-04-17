@@ -56,6 +56,13 @@ router.patch(
 );
 
 router.patch(
+  "/:id/pay",
+  requireAuth,
+  requireRole("patient"),
+  controller.markPaid,
+);
+
+router.patch(
   "/:id/complete",
   requireAuth,
   requireRole("doctor"),

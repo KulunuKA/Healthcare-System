@@ -5,6 +5,7 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   VideoCameraOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -23,10 +24,22 @@ const tmStatusLabels = {
 export default function PatientTmRequestCard({
   req,
   cancelingTmId,
+  payingTmId,
   onCancelRequest,
+  onPayRequest,
 }) {
   const id = req.id || req._id;
   const status = req.status || "pending";
+  const paid = req.paid === true;
+  const accepted = status === "accepted";
+  const scheduled = Boolean(req.scheduledAt);
+
+  const showPay =
+    accepted && scheduled && !paid;
+  const showJoin =
+    accepted && paid && req.meetingLink && req.isMeetingLinkVisible;
+  const showPaidButWaitingForWindow =
+    accepted && scheduled && paid && !req.isMeetingLinkVisible;
 
   return (
     <div className={`${styles.card} ${styles.cardPatient}`} data-status={status}>
@@ -93,7 +106,32 @@ export default function PatientTmRequestCard({
               </div>
             </div>
 
-            {req.meetingLink && req.isMeetingLinkVisible ? (
+            {showPay ? (
+              <div style={{ marginTop: 10 }}>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "#64748b",
+                    marginBottom: 8,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  Pay the session fee to unlock your secure video link when it
+                  becomes available before the visit.
+                </p>
+                <Button
+                  type="primary"
+                  className={styles.payBtn}
+                  icon={<CreditCardOutlined />}
+                  loading={payingTmId === id}
+                  onClick={() => onPayRequest(id)}
+                >
+                  Pay to unlock meeting link
+                </Button>
+              </div>
+            ) : null}
+
+            {showJoin ? (
               <div style={{ marginTop: 10 }}>
                 <Button
                   type="primary"
@@ -106,9 +144,12 @@ export default function PatientTmRequestCard({
                   Join secure session
                 </Button>
               </div>
-            ) : req.status === "accepted" && req.scheduledAt ? (
+            ) : null}
+
+            {showPaidButWaitingForWindow ? (
               <p className={styles.linkHint} style={{ marginTop: 8 }}>
-                Your meeting link unlocks within two days of the scheduled start.
+                Payment received. Your join button appears within two days of the
+                scheduled start.
               </p>
             ) : null}
           </div>

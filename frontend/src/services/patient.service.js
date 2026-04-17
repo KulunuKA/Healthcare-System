@@ -63,6 +63,15 @@ export function cancelTelemedicineRequestAPI(token, requestId) {
   );
 }
 
+/** Marks telemedicine session as paid (replace with real payment gateway later). */
+export function payTelemedicineRequestAPI(token, requestId) {
+  return axiosInstance.patch(
+    `${TELEMEDICINE_API_BASE}/requests/${requestId}/pay`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
 // ─── Appointments ────────────────────────────────────
 export function bookAppointmentAPI(token, appointmentData) {
   return axiosInstance.post(

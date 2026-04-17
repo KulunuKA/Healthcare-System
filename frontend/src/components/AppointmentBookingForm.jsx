@@ -141,7 +141,7 @@ export default function AppointmentBookingForm({
             showIcon
             style={{ marginBottom: "24px" }}
             message="What happens next"
-            description="The doctor will review your telemedicine request and send you a date, time, and meeting link."
+            description="The doctor will review your request and schedule a time. After approval, you will pay a session fee to unlock your video link when it becomes available."
           />
 
           <Form.Item>
