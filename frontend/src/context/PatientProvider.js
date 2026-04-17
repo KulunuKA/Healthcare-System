@@ -9,6 +9,7 @@ import {
   cancelTelemedicineRequestAPI,
   getPatientAppointmentsAPI,
   cancelAppointmentAPI,
+  patientAPI,
 } from "@/services/patient.service";
 import { setSession, getSessionValue } from "@/utils/session";
 import { createContext, useCallback, useContext, useState } from "react";
@@ -34,6 +35,10 @@ export const PatientProvider = ({ children }) => {
   const [loadingTelemedicineRequests, setLoadingTelemedicineRequests] =
     useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const getToken = () => getSessionValue("accessToken");
 
@@ -57,6 +62,62 @@ export const PatientProvider = ({ children }) => {
       throw (
         error?.response?.data?.message || error?.message || "Failed to register patient"
       );
+    }
+  };
+
+  const getPatientProfile = async () => {
+    const t = getSessionValue("accessToken");
+    if (!t) throw new Error("missing token");
+    setLoading(true);
+    try {
+      const res = await patientAPI.getProfile();
+      console.log(res.data.profile)
+      setProfile(res.data.profile);
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePatientProfile = async (payload) => {
+    const t = getSessionValue("accessToken");
+    if (!t) throw new Error("missing token");
+    setSaving(true);
+    try {
+      const res = await patientAPI.updateProfile( payload);
+      if (res?.data?.success) {
+        setProfile(res.data.profile);
+      }
+      return res;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getNotifications = async (token) => {
+    const t = token || getSessionValue('accessToken');
+    if (!t) throw new Error('missing token');
+    try {
+      const res = await patientAPI.getNotifications();
+      if (res?.data?.success) setNotifications(res.data.notifications || []);
+      return res;
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const markNotificationRead = async (id) => {
+    const t = getSessionValue('accessToken');
+    if (!t) throw new Error('missing token');
+    try {
+      const res = await patientAPI.markNotificationRead(id);
+      if (res?.data?.success) {
+        // update local notification state
+        setNotifications((prev) => prev.map(n => n._id === id ? { ...n, read: true } : n));
+      }
+      return res;
+    } catch (e) {
+      throw e;
     }
   };
 
@@ -258,6 +319,11 @@ export const PatientProvider = ({ children }) => {
         fetchDoctorsBySpecialty,
         submitTelemedicineRequest,
         cancelTelemedicineRequest,
+        getPatientProfile,
+        updatePatientProfile,
+        getNotifications,
+        markNotificationRead,
+        profile
       }}
     >
       {children}

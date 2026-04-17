@@ -39,7 +39,7 @@ export default function DoctorsPage() {
           {specialties.map(({ name, Icon }) => (
             <Link
               key={name}
-              href={`/patient/doctors?specialty=${encodeURIComponent(name)}`}
+              href={`/ourdoctors?specialty=${encodeURIComponent(name)}`}
               className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 cursor-pointer transition hover:border-slate-300 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f2d6b]"
             >
               <div>

@@ -161,7 +161,7 @@ export default function AppointmentsPage() {
           <CalendarOutlined style={{ marginRight: "10px" }} />
           My Appointments
         </h1>
-        <Link href="/patient/doctors">
+        <Link href="/ourdoctors">
           <Button type="primary" size="large">
             Book New Appointment
           </Button>
