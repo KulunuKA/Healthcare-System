@@ -71,6 +71,7 @@ const createNotification = async (req, res) => {
 const listNotifications = async (req, res) => {
   try {
     const userId = getUserIdFromReq(req);
+    console.log('listNotifications userId:', userId);
     if (!userId) return res.status(401).json({ success: false, message: 'Missing Authorization header' });
 
     const query = { receiptId: userId };
@@ -83,5 +84,29 @@ const listNotifications = async (req, res) => {
   }
 };
 
-module.exports = { appointmentBooked, paymentSuccess , createNotification, listNotifications };
+const markAsRead = async (req, res) => {
+  try {
+    const userId = getUserIdFromReq(req);
+    if (!userId) return res.status(401).json({ success: false, message: 'Missing Authorization header' });
+
+    const notifId = req.params.id;
+    if (!notifId) return res.status(400).json({ success: false, message: 'Missing notification id' });
+
+    // Ensure notification belongs to user
+    const notif = await Notification.findById(notifId);
+    if (!notif) return res.status(404).json({ success: false, message: 'Notification not found' });
+    if (String(notif.receiptId) !== String(userId)) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    notif.read = true;
+    await notif.save();
+    return res.json({ success: true, notification: notif });
+  } catch (err) {
+    console.error('markAsRead error', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+module.exports = { appointmentBooked, paymentSuccess , createNotification, listNotifications, markAsRead };
 

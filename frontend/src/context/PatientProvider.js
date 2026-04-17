@@ -20,6 +20,7 @@ export const PatientProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   // ─── Auth ────────────────────────────────────────
   const registerPatient = async (patientData) => {
@@ -74,15 +75,31 @@ export const PatientProvider = ({ children }) => {
     }
   };
 
-  const getNotifications = async () => {
-    const t = getSessionValue("accessToken");
-    if (!t) throw new Error("missing token");
+  const getNotifications = async (token) => {
+    const t = token || getSessionValue('accessToken');
+    if (!t) throw new Error('missing token');
+    setNotificationsLoading(true);
     try {
       const res = await patientAPI.getNotifications();
       if (res?.data?.success) setNotifications(res.data.notifications || []);
       return res;
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const markNotificationRead = async (id) => {
+    const t = getSessionValue('accessToken');
+    if (!t) throw new Error('missing token');
+    try {
+      const res = await patientAPI.markNotificationRead(id);
+      if (res?.data?.success) {
+        // update local notification state
+        setNotifications((prev) => prev.map(n => n._id === id ? { ...n, read: true } : n));
+      }
+      return res;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   };
 
@@ -101,7 +118,8 @@ export const PatientProvider = ({ children }) => {
         notifications,
         getPatientProfile,
         updatePatientProfile,
-        getNotifications
+        getNotifications,
+        markNotificationRead
       }}
     >
       {children}

@@ -79,4 +79,9 @@ export const patientAPI = {
   getNotifications: () => {
     return axiosInstance.get(`${NOTIFICATION_API_BASE}/notifications`);
   },
+  markNotificationRead: (id) => {
+    return axiosInstance.put(
+      `${NOTIFICATION_API_BASE}/notifications/${id}/read`,
+    );
+  },
 };
