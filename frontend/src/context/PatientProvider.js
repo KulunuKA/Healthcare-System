@@ -1,11 +1,6 @@
 "use client";
 import {
-  registerPatientAPI,
-  loginPatientAPI,
-  getDoctorsBySpecialtyAPI,
-  bookAppointmentAPI,
-  getPatientAppointmentsAPI,
-  cancelAppointmentAPI,
+  patientAPI,
 } from "@/services/patient.service";
 import { setSession, getSessionValue } from "@/utils/session";
 import { createContext, useContext, useState, useCallback } from "react";
@@ -21,13 +16,16 @@ export const PatientProvider = ({ children }) => {
   const [doctors, setDoctors] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const getToken = () => getSessionValue("accessToken");
 
   // ─── Auth ────────────────────────────────────────
   const registerPatient = async (patientData) => {
     try {
-      const response = await registerPatientAPI(patientData);
+      const response = await patientAPI.register(patientData);
 
       if (response.status === 201) {
         const data = response.data.data;
@@ -47,6 +45,36 @@ export const PatientProvider = ({ children }) => {
     }
   };
 
+  const getPatientProfile = async () => {
+    const t = getSessionValue("accessToken");
+    if (!t) throw new Error("missing token");
+    setLoading(true);
+    try {
+      const res = await patientAPI.getProfile(t);
+      if (res?.data?.success) {
+        setProfile(res.data.profile);
+      }
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePatientProfile = async (payload) => {
+    const t = getSessionValue("accessToken");
+    if (!t) throw new Error("missing token");
+    setSaving(true);
+    try {
+      const res = await patientAPI.updateProfile( payload);
+      if (res?.data?.success) {
+        setProfile(res.data.profile);
+      }
+      return res;
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <PatientContext.Provider
       value={{
@@ -55,6 +83,12 @@ export const PatientProvider = ({ children }) => {
         doctors,
         loadingAppointments,
         loadingDoctors,
+        profile,
+        setProfile,
+        loading,
+        saving,
+        getPatientProfile,
+        updatePatientProfile,
       }}
     >
       {children}

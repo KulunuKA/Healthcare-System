@@ -5,7 +5,6 @@ import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";
 import { usePathname } from "next/navigation";
-import Button from "@/components/ui/Button.jsx";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -23,14 +22,13 @@ export default function Navbar() {
     const user = getSessionValue("user");
     if (user) {
       setIsLoggedIn(true);
-      setUser(user);
+      setUser(JSON.parse(user));
     }
   }, []);
 
   // helper to compute initial
   const getFirstChar = (user) => {
     const fullName = user?.profile?.fullName;
-    console.log(fullName);
     if (typeof fullName === "string" && fullName.trim().length > 0) {
       return fullName.trim().charAt(0).toUpperCase();
     }
@@ -85,7 +83,7 @@ export default function Navbar() {
             {isLoggedIn ? (
               // show circular initial when logged in
               <Link
-                href={user?.role === "patient" ? "/patient" : "/"}
+                href={user?.role === "patient" ? "/me" : "/"}
                 className="flex items-center"
               >
                 <div
