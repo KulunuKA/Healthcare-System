@@ -15,5 +15,15 @@ function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth };
+function requireRole(...allowed) {
+  const roles = allowed.flat();
+  return (req, res, next) => {
+    if (!req.user?.role || !roles.includes(req.user.role)) {
+      return next(new AppError("Forbidden", 403));
+    }
+    return next();
+  };
+}
+
+module.exports = { requireAuth, requireRole };
 

@@ -154,9 +154,14 @@ export default function DoctorAppointmentsPage() {
             {appointment.patientId?.email}
           </p>
         </div>
-        <Tag color={statusColors[appointment.status]}>
-          {statusLabels[appointment.status]}
-        </Tag>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {appointment.isTelemedicineRequest ? (
+            <Tag color="purple">Telemedicine</Tag>
+          ) : null}
+          <Tag color={statusColors[appointment.status]}>
+            {statusLabels[appointment.status]}
+          </Tag>
+        </div>
       </div>
 
       {/* Details */}
@@ -167,17 +172,33 @@ export default function DoctorAppointmentsPage() {
           borderBottom: "1px solid #f0f0f0",
         }}
       >
-        <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
-          <CalendarOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-          <strong>Date:</strong>{" "}
-          {dayjs(appointment.startAt).format("dddd, MMM DD, YYYY")}
-        </p>
-        <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
-          <ClockCircleOutlined
-            style={{ marginRight: "8px", color: "#1890ff" }}
-          />
-          <strong>Time:</strong> {dayjs(appointment.startAt).format("HH:mm")}
-        </p>
+        {appointment.startAt ? (
+          <>
+            <p
+              style={{ margin: "8px 0", display: "flex", alignItems: "center" }}
+            >
+              <CalendarOutlined
+                style={{ marginRight: "8px", color: "#1890ff" }}
+              />
+              <strong>Date:</strong>{" "}
+              {dayjs(appointment.startAt).format("dddd, MMM DD, YYYY")}
+            </p>
+            <p
+              style={{ margin: "8px 0", display: "flex", alignItems: "center" }}
+            >
+              <ClockCircleOutlined
+                style={{ marginRight: "8px", color: "#1890ff" }}
+              />
+              <strong>Time:</strong> {dayjs(appointment.startAt).format("HH:mm")}
+            </p>
+          </>
+        ) : (
+          <p style={{ margin: "8px 0", color: "#531dab", fontSize: "14px" }}>
+            <CalendarOutlined style={{ marginRight: "8px", color: "#722ed1" }} />
+            <strong>Date & time:</strong> Not set yet — confirm with the patient
+            after you send the schedule and meeting link.
+          </p>
+        )}
         {appointment.reason && (
           <p style={{ margin: "8px 0", color: "#666", fontSize: "14px" }}>
             <strong>Reason:</strong> {appointment.reason}

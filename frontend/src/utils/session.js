@@ -13,16 +13,7 @@ export const getSessionValue = (key) => {
   }
 
   try {
-    const value = sessionStorage.getItem(key);
-    if (!value) return null;
-
-    // Try to parse as JSON, but return raw string if it fails
-    try {
-      return JSON.parse(value);
-    } catch {
-      // If not JSON (e.g., JWT token), return raw string
-      return value;
-    }
+    return sessionStorage.getItem(key);
   } catch (error) {
     console.warn("sessionStorage.getItem failed:", error);
     return null;

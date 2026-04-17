@@ -2,10 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card, Button, Select, Input, Spin, Empty, Badge, Tag } from "antd";
-import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
+import {
+  Card,
+  Button,
+  Select,
+  Input,
+  Spin,
+  Empty,
+  Tag,
+  message,
+} from "antd";
+import {
+  SearchOutlined,
+  TeamOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
-import Link from "next/link";
 
 const specialties = [
   "General Physician",
@@ -25,6 +37,7 @@ export default function DoctorsPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fromUrl = searchParams.get("specialty");
@@ -41,17 +54,19 @@ export default function DoctorsPage() {
 
   const loadDoctors = async () => {
     try {
+      setError(null);
       await fetchDoctorsBySpecialty(selectedSpecialty);
     } catch (error) {
       console.error("Error loading doctors:", error);
+      setError("Failed to load doctors. Please try again.");
+      message.error("Failed to load doctors");
     }
   };
 
   useEffect(() => {
-    const filtered = doctors.filter(
-      (doctor) =>
-        doctor.fullName?.toLowerCase().includes(searchText.toLowerCase()) ||
-        doctor.email?.toLowerCase().includes(searchText.toLowerCase()),
+    const q = searchText.toLowerCase().trim();
+    const filtered = (Array.isArray(doctors) ? doctors : []).filter((doctor) =>
+      doctor.fullName?.toLowerCase().includes(q),
     );
     setFilteredDoctors(filtered);
   }, [doctors, searchText]);
@@ -98,7 +113,7 @@ export default function DoctorsPage() {
               Search Doctor
             </label>
             <Input
-              placeholder="Search by name or email"
+              placeholder="Search by doctor name"
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -111,6 +126,8 @@ export default function DoctorsPage() {
       {/* Doctors Grid */}
       {!selectedSpecialty ? (
         <Empty description="Select a specialty to view available doctors" />
+      ) : error ? (
+        <Empty description={error} />
       ) : loadingDoctors ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
           <Spin size="large" description="Loading doctors..." />
@@ -154,9 +171,6 @@ export default function DoctorsPage() {
               </div>
 
               <div style={{ marginBottom: "15px", flex: 1 }}>
-                <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
-                  <strong>Email:</strong> {doctor.email}
-                </p>
                 {doctor.experience && (
                   <p
                     style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
@@ -178,13 +192,34 @@ export default function DoctorsPage() {
                 )}
               </div>
 
-              <Link
-                href={`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
               >
-                <Button type="primary" block>
+                <Button
+                  type="primary"
+                  block
+                  href={`/patient/appointments/new?doctorId=${encodeURIComponent(
+                    String(doctor._id ?? doctor.id),
+                  )}`}
+                >
                   Book Appointment
                 </Button>
-              </Link>
+                {doctor.offerTelemedicine ? (
+                  <Button
+                    block
+                    icon={<VideoCameraOutlined />}
+                    href={`/patient/appointments/new?doctorId=${encodeURIComponent(
+                      String(doctor._id ?? doctor.id),
+                    )}&telemedicine=true`}
+                  >
+                    Book for telemedicine
+                  </Button>
+                ) : null}
+              </div>
             </Card>
           ))}
         </div>
