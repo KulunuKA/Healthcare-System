@@ -1,24 +1,19 @@
 const express = require("express");
 const cors = require("cors");
-const helmet = require("helmet");
-const { requestId, logRequests, errorHandler, notFound } = require("@hc/shared");
-const { createTelemedicineRoutes } = require("./routes/telemedicineRoutes");
+const consultationRoutes = require("./routes/consultation.routes");
 
-function createApp() {
-  const app = express();
-  app.use(helmet());
-  app.use(cors());
-  app.use(express.json({ limit: "10mb" }));
-  app.use(requestId);
-  app.use(logRequests);
+const app = express();
 
-  app.get("/health", (req, res) => res.json({ success: true, message: "telemedicine-service ok" }));
-  app.use("/", createTelemedicineRoutes());
+app.use(cors());
+app.use(express.json());
 
-  app.use(notFound);
-  app.use(errorHandler);
-  return app;
-}
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Telemedicine service is running complete"
+  });
+});
 
-module.exports = { createApp };
+app.use("/api/consultations", consultationRoutes);
 
+module.exports = app;

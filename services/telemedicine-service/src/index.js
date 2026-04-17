@@ -1,22 +1,20 @@
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
-const { createApp } = require("./app");
-const { connectMongo } = require("./db/connection");
+const app = require("./app");
+const connectDB = require("./config/db/connection");
 
-async function main() {
-  const { PORT } = require("./config");
-  await connectMongo();
-  const app = createApp();
-  app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`telemedicine-service listening on :${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 5005;
 
-main().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error("telemedicine-service failed to start:", err);
-  process.exit(1);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
 
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server failed to start:", error.message);
+  }
+};
+
+startServer();

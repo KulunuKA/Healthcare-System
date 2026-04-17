@@ -1,7 +1,11 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";
+import { usePathname } from "next/navigation";
+import Button from "@/components/ui/Button.jsx";
 
 const navLinks = [
   { label: "Home", href: "/" },

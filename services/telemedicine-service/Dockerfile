@@ -10,4 +10,3 @@ RUN cd services/telemedicine-service && npm install
 EXPOSE 3004
 
 CMD ["node", "services/telemedicine-service/src/index.js"]
-
