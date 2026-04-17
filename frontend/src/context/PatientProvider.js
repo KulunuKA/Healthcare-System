@@ -14,6 +14,13 @@ import { useAuth } from "./AuthProvider";
 
 const PatientContext = createContext();
 
+/** Appointment service returns `{ doctors: [...] }`; some paths may return a bare array. */
+function normalizeDoctorList(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.doctors)) return payload.doctors;
+  return [];
+}
+
 export const PatientProvider = ({ children }) => {
   const router = useRouter();
   const { setUser } = useAuth();
