@@ -1,7 +1,9 @@
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const { createProxyMiddleware, fixRequestBody } = require("http-proxy-middleware");
 
-function createProxiedRouter({ serviceUrl }) {
+console.log("--->> Proxy routes module loaded");
+
+function createProxiedRouter({ serviceUrl, stripPrefix }) {
   const router = express.Router();
 
   router.use(
@@ -9,13 +11,36 @@ function createProxiedRouter({ serviceUrl }) {
     createProxyMiddleware({
       target: serviceUrl,
       changeOrigin: true,
-      xfwd: true,
-      logLevel: "warn",
-      onProxyReq: (proxyReq, req) => {
-        if (req.requestId) proxyReq.setHeader("x-request-id", req.requestId);
+      logLevel: "debug",
+
+      pathRewrite: (path) => {
+        if (stripPrefix && path.startsWith(stripPrefix)) {
+          return path.replace(stripPrefix, "") || "/";
+        }
+        return path;
       },
+
+      onProxyReq: (proxyReq, req, res) => {
+        // ✅ fix body properly (IMPORTANT)
+        fixRequestBody(proxyReq, req);
+
+        if (req.requestId) {
+          proxyReq.setHeader("x-request-id", req.requestId);
+        }
+
+      },
+
+      onProxyRes: (proxyRes, req) => {
+        console.log("✅ Response from service:", proxyRes.statusCode, req.originalUrl);
+      },
+
       onError: (err, req, res) => {
-        res.status(502).json({ success: false, message: "Bad Gateway", details: err?.message });
+        console.error("❌ Proxy error:", err.message);
+        res.status(502).json({
+          success: false,
+          message: "Bad Gateway",
+          details: err?.message,
+        });
       },
     })
   );
@@ -24,4 +49,3 @@ function createProxiedRouter({ serviceUrl }) {
 }
 
 module.exports = { createProxiedRouter };
-

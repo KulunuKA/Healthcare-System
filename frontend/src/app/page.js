@@ -43,6 +43,8 @@ export default function HomePage() {
     }
   };
 
+  console.log(mockAppointment)
+
   return (
     <main className="min-h-screen bg-white text-[#2f2d6b] p-10">
       <div className="max-w-4xl mx-auto">
