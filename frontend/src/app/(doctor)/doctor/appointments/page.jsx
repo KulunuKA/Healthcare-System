@@ -1,8 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Tag, Empty, Spin, Modal, message, Tabs, Badge, Space } from "antd";
-import { CalendarOutlined, ClockCircleOutlined, CheckOutlined, CloseOutlined, PhoneOutlined } from "@ant-design/icons";
+import {
+  Card,
+  Button,
+  Tag,
+  Empty,
+  Spin,
+  Modal,
+  message,
+  Tabs,
+  Badge,
+  Space,
+} from "antd";
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  PhoneOutlined,
+} from "@ant-design/icons";
 import { useDoctor } from "@/context/DoctorProvider";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -26,7 +43,12 @@ const statusLabels = {
 };
 
 export default function DoctorAppointmentsPage() {
-  const { fetchDoctorAppointments, decideAppointment, appointments, loadingAppointments } = useDoctor();
+  const {
+    fetchDoctorAppointments,
+    decideAppointment,
+    appointments,
+    loadingAppointments,
+  } = useDoctor();
   const [loading, setLoading] = useState(true);
   const [decidingId, setDecidingId] = useState(null);
   const [activeTab, setActiveTab] = useState("pending");
@@ -48,7 +70,8 @@ export default function DoctorAppointmentsPage() {
   };
 
   const handleDecideAppointment = (appointmentId, decision) => {
-    const title = decision === "accepted" ? "Accept Appointment" : "Reject Appointment";
+    const title =
+      decision === "accepted" ? "Accept Appointment" : "Reject Appointment";
     const content =
       decision === "accepted"
         ? "Are you sure you want to accept this appointment?"
@@ -77,19 +100,29 @@ export default function DoctorAppointmentsPage() {
   };
 
   const getPendingAppointments = () =>
-    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "scheduled");
+    (Array.isArray(appointments) ? appointments : []).filter(
+      (a) => a.status === "scheduled",
+    );
 
   const getAcceptedAppointments = () =>
-    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "accepted");
+    (Array.isArray(appointments) ? appointments : []).filter(
+      (a) => a.status === "accepted",
+    );
 
   const getRejectedAppointments = () =>
-    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "rejected");
+    (Array.isArray(appointments) ? appointments : []).filter(
+      (a) => a.status === "rejected",
+    );
 
   const getCancelledAppointments = () =>
-    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "cancelled");
+    (Array.isArray(appointments) ? appointments : []).filter(
+      (a) => a.status === "cancelled",
+    );
 
   const getCompletedAppointments = () =>
-    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "completed");
+    (Array.isArray(appointments) ? appointments : []).filter(
+      (a) => a.status === "completed",
+    );
 
   const AppointmentCard = ({ appointment, showActions = false }) => (
     <Card
@@ -99,9 +132,22 @@ export default function DoctorAppointmentsPage() {
       }}
     >
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "15px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "start",
+          marginBottom: "15px",
+        }}
+      >
         <div>
-          <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: "0 0 5px 0" }}>
+          <h3
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              margin: "0 0 5px 0",
+            }}
+          >
             {appointment.patientId?.fullName || "Unknown Patient"}
           </h3>
           <p style={{ margin: "0", color: "#666", fontSize: "14px" }}>
@@ -114,13 +160,22 @@ export default function DoctorAppointmentsPage() {
       </div>
 
       {/* Details */}
-      <div style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
+      <div
+        style={{
+          marginBottom: "15px",
+          paddingBottom: "15px",
+          borderBottom: "1px solid #f0f0f0",
+        }}
+      >
         <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
           <CalendarOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-          <strong>Date:</strong> {dayjs(appointment.startAt).format("dddd, MMM DD, YYYY")}
+          <strong>Date:</strong>{" "}
+          {dayjs(appointment.startAt).format("dddd, MMM DD, YYYY")}
         </p>
         <p style={{ margin: "8px 0", display: "flex", alignItems: "center" }}>
-          <ClockCircleOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
+          <ClockCircleOutlined
+            style={{ marginRight: "8px", color: "#1890ff" }}
+          />
           <strong>Time:</strong> {dayjs(appointment.startAt).format("HH:mm")}
         </p>
         {appointment.reason && (
@@ -154,7 +209,12 @@ export default function DoctorAppointmentsPage() {
             icon={<CheckOutlined />}
             block
             loading={decidingId === (appointment._id || appointment.id)}
-            onClick={() => handleDecideAppointment(appointment._id || appointment.id, "accepted")}
+            onClick={() =>
+              handleDecideAppointment(
+                appointment._id || appointment.id,
+                "accepted",
+              )
+            }
           >
             Accept
           </Button>
@@ -163,7 +223,12 @@ export default function DoctorAppointmentsPage() {
             icon={<CloseOutlined />}
             block
             loading={decidingId === (appointment._id || appointment.id)}
-            onClick={() => handleDecideAppointment(appointment._id || appointment.id, "rejected")}
+            onClick={() =>
+              handleDecideAppointment(
+                appointment._id || appointment.id,
+                "rejected",
+              )
+            }
           >
             Reject
           </Button>
@@ -289,24 +354,44 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "1000px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "30px", fontSize: "32px", fontWeight: "bold" }}>
+      <h1
+        style={{ marginBottom: "30px", fontSize: "32px", fontWeight: "bold" }}
+      >
         <CalendarOutlined style={{ marginRight: "10px" }} />
         Appointments Management
       </h1>
 
-      <div style={{ backgroundColor: "#f5f5f5", padding: "15px", borderRadius: "8px", marginBottom: "20px" }}>
+      <div
+        style={{
+          backgroundColor: "#f5f5f5",
+          padding: "15px",
+          borderRadius: "8px",
+          marginBottom: "20px",
+        }}
+      >
         <Space size="large">
           <div>
-            <span style={{ fontSize: "14px", color: "#666" }}>Total Appointments:</span>
-            <Badge count={appointments.length} style={{ backgroundColor: "#1890ff" }} />
+            <span style={{ fontSize: "14px", color: "#666" }}>
+              Total Appointments:
+            </span>
+            <Badge
+              count={appointments.length}
+              style={{ backgroundColor: "#1890ff" }}
+            />
           </div>
           <div>
             <span style={{ fontSize: "14px", color: "#666" }}>Pending:</span>
-            <Badge count={getPendingAppointments().length} style={{ backgroundColor: "#faad14" }} />
+            <Badge
+              count={getPendingAppointments().length}
+              style={{ backgroundColor: "#faad14" }}
+            />
           </div>
           <div>
             <span style={{ fontSize: "14px", color: "#666" }}>Confirmed:</span>
-            <Badge count={getAcceptedAppointments().length} style={{ backgroundColor: "#52c41a" }} />
+            <Badge
+              count={getAcceptedAppointments().length}
+              style={{ backgroundColor: "#52c41a" }}
+            />
           </div>
         </Space>
       </div>

@@ -85,7 +85,9 @@ export const PatientProvider = ({ children }) => {
     try {
       const token = getToken();
       const response = await getPatientAppointmentsAPI(token);
-      setAppointments(Array.isArray(response.data.data) ? response.data.data : []);
+      setAppointments(
+        Array.isArray(response.data.data) ? response.data.data : [],
+      );
       return response.data.data || [];
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -103,7 +105,9 @@ export const PatientProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       console.error("Error booking appointment:", error);
-      throw error.response?.data || error.message || "Failed to book appointment";
+      throw (
+        error.response?.data || error.message || "Failed to book appointment"
+      );
     }
   };
 
@@ -115,7 +119,9 @@ export const PatientProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       console.error("Error cancelling appointment:", error);
-      throw error.response?.data || error.message || "Failed to cancel appointment";
+      throw (
+        error.response?.data || error.message || "Failed to cancel appointment"
+      );
     }
   };
 
