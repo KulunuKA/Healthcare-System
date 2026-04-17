@@ -7,12 +7,19 @@ export function loginDoctorAPI({ email, password }) {
   return axiosInstance.post(`${API_BASE_URL}/auth/login`, { email, password });
 }
 
-export function registerDoctorAPI({ email, password, fullName, specialty }) {
+export function registerDoctorAPI({
+  email,
+  password,
+  fullName,
+  specialty,
+  offerTelemedicine,
+}) {
   return axiosInstance.post(`${API_BASE_URL}/auth/register`, {
     email,
     password,
     fullName,
     specialty,
+    offerTelemedicine,
   });
 }
 
