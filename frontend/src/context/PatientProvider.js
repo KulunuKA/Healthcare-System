@@ -1,14 +1,30 @@
 "use client";
-import { registerPatientAPI } from "@/services/patient.service";
-import { setSession } from "@/utils/session";
-import { createContext, useContext } from "react";
+import {
+  registerPatientAPI,
+  loginPatientAPI,
+  getDoctorsBySpecialtyAPI,
+  bookAppointmentAPI,
+  getPatientAppointmentsAPI,
+  cancelAppointmentAPI,
+} from "@/services/patient.service";
+import { setSession, getSessionValue } from "@/utils/session";
+import { createContext, useContext, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthProvider";
 
 const PatientContext = createContext();
 
 export const PatientProvider = ({ children }) => {
   const router = useRouter();
+  const { setUser } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [loadingDoctors, setLoadingDoctors] = useState(false);
 
+  const getToken = () => getSessionValue("accessToken");
+
+  // ─── Auth ────────────────────────────────────────
   const registerPatient = async (patientData) => {
     try {
       const response = await registerPatientAPI(patientData);
@@ -16,7 +32,7 @@ export const PatientProvider = ({ children }) => {
       if (response.status === 201) {
         const data = response.data.data;
         //store token and user info in localStorage or context
-        setSession("accessToken", data.token);
+        setSession("ç", data.token);
         setSession("user", JSON.stringify(data.user));
 
         //redirect to patient dashboard or home page
@@ -26,12 +42,26 @@ export const PatientProvider = ({ children }) => {
     } catch (error) {
       console.error("Error registering patient:", error);
       throw (
-        error?.response?.data?.message || error?.message || "Failed to register patient"
+        error.response.data || error.message || "Failed to register patient"
       );
     }
   };
+
   return (
-    <PatientContext.Provider value={{ registerPatient }}>
+    <PatientContext.Provider
+      value={{
+        registerPatient,
+        loginPatient,
+        fetchDoctorsBySpecialty,
+        bookAppointment,
+        fetchPatientAppointments,
+        cancelAppointment,
+        appointments,
+        doctors,
+        loadingAppointments,
+        loadingDoctors,
+      }}
+    >
       {children}
     </PatientContext.Provider>
   );
