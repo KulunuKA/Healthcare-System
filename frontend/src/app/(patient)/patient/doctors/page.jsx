@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, Button, Select, Input, Spin, Empty, Badge, Tag } from "antd";
 import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
 import Link from "next/link";
 
 const specialties = [
+  "General Physician",
   "Cardiology",
   "Dermatology",
   "Neurology",
@@ -19,11 +20,18 @@ const specialties = [
 ];
 
 export default function DoctorsPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const { fetchDoctorsBySpecialty, doctors, loadingDoctors } = usePatient();
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("specialty");
+    if (fromUrl) {
+      setSelectedSpecialty(fromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedSpecialty) {

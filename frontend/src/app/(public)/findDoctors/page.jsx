@@ -39,9 +39,10 @@ export default function DoctorsPage() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {specialties.map(({ name, Icon }) => (
-            <div
+            <Link
               key={name}
-              className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 cursor-pointer transition hover:border-slate-300 hover:bg-slate-100"
+              href={`/patient/doctors?specialty=${encodeURIComponent(name)}`}
+              className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 cursor-pointer transition hover:border-slate-300 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f2d6b]"
             >
               <div>
                 <h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -52,7 +53,7 @@ export default function DoctorsPage() {
                   <span>{name}</span>
                 </h2>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
