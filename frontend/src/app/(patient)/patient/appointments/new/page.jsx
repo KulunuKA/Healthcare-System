@@ -113,7 +113,7 @@ export default function NewAppointmentPage() {
           }
           style={{ marginTop: "50px" }}
         >
-          <Link href="/patient/doctors" style={{ color: "#1890ff" }}>
+          <Link href="/ourdoctors" style={{ color: "#1890ff" }}>
             Browse doctors
           </Link>
         </Empty>
@@ -128,7 +128,7 @@ export default function NewAppointmentPage() {
           description="This doctor is not available for telemedicine"
           style={{ marginTop: "50px" }}
         >
-          <Link href="/patient/doctors" style={{ color: "#1890ff" }}>
+          <Link href="/ourdoctors" style={{ color: "#1890ff" }}>
             Back to doctors
           </Link>
         </Empty>
