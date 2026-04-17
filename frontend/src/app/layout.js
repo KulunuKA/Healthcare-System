@@ -1,6 +1,8 @@
+import { PatientProvider } from "@/context/PatientProvider";
+import { AuthProvider } from "@/context/AuthProvider";
+import { DoctorProvider } from "@/context/DoctorProvider";
 import "./globals.css";
-import Navbar from "@/components/shared/navbar/navbar";
-import Footer from "@/components/shared/footer/footer";
+import LayoutClient from "./LayoutClient";
 
 export const metadata = {
   title: "Smart Healthcare Platform",
@@ -9,13 +11,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col">
-        <Navbar />
-
-        <main className="flex-1">{children}</main>
-
-        <Footer />
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen" suppressHydrationWarning>
+        <LayoutClient>
+          <AuthProvider>
+            <DoctorProvider>
+              <PatientProvider>{children}</PatientProvider>
+            </DoctorProvider>
+          </AuthProvider>
+        </LayoutClient>
       </body>
     </html>
   );

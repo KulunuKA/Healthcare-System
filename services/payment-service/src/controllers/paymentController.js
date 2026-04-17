@@ -1,26 +1,50 @@
 const axios = require("axios");
-const { asyncHandler, response, AppError } = require("@hc/shared");
+const { asyncHandler, response, AppError } = require("../../../../shared");
 const Payment = require("../models/Payment");
 const config = require("../config");
-const { generateProviderReference } = require("../services/paymentService");
+const { generatePayHereHash } = require("../services/paymentService");
 
 const initiatePayment = asyncHandler(async (req, res) => {
-  const { provider, appointmentId, amount } = req.body || {};
-  if (!provider || !appointmentId) throw new AppError("provider and appointmentId are required", 400);
-  if (!["payhere", "stripe"].includes(provider)) throw new AppError("provider must be payhere|stripe", 400);
+  const { provider, appointmentId, amount, patientDetails } = req.body || {};
+
+  if (!provider || !appointmentId || !amount) {
+    throw new AppError("provider, appointmentId, and amount are required", 400);
+  }
+
+  const formattedAmount = parseFloat(amount).toFixed(2);
 
   const payment = await Payment.create({
     appointmentId,
     provider,
-    amount: typeof amount === "number" ? amount : Number(amount || 0),
-    status: "pending",
-    providerReference: generateProviderReference(),
+    amount: Number(formattedAmount),
+    status: "initiated",
   });
 
-  const redirectUrl =
-    provider === "stripe"
-      ? `https://stripe.test/payments/${payment._id}`
-      : `https://payhere.test/pay/${payment._id}`;
+  let payhereData = null;
+
+  if (provider === "payhere") {
+    const orderId = payment._id.toString();
+    const hash = generatePayHereHash(orderId, formattedAmount, "LKR");
+
+    payhereData = {
+      merchant_id: 1234895, 
+      return_url: "http://localhost:3000/patient/appointments",
+      cancel_url: "http://localhost:3000/patient/payment-failed",
+      notify_url: "https://cone-quartered-scribe.ngrok-free.dev/webhooks/payhere",
+      order_id: orderId,
+      items: "Doctor Consultation",
+      currency: "LKR",
+      amount: formattedAmount,
+      hash,
+      first_name: patientDetails?.firstName || "Patient",
+      last_name: patientDetails?.lastName || "User",
+      email: patientDetails?.email || "test@example.com",
+      phone: patientDetails?.phone || "0771234567",
+      address: "Colombo",
+      city: "Colombo",
+      country: "Sri Lanka",
+    };
+  }
 
   return response.sendSuccess(res, {
     statusCode: 201,
@@ -29,59 +53,78 @@ const initiatePayment = asyncHandler(async (req, res) => {
       paymentId: payment._id,
       status: payment.status,
       provider,
-      redirectUrl,
+      payhereData,
     },
   });
 });
 
-const getPayment = asyncHandler(async (req, res) => {
-  const paymentId = req.params.paymentId;
-  const payment = await Payment.findById(paymentId).lean();
-  if (!payment) throw new AppError("Payment not found", 404);
-  return response.sendSuccess(res, { message: "payment", data: payment });
-});
-
 const webhookPayment = asyncHandler(async (req, res) => {
-  const { paymentId, status, webhookReference } = req.body || {};
-  if (!paymentId || !status) throw new AppError("paymentId and status are required", 400);
-  if (!["succeeded", "failed"].includes(status)) throw new AppError("status must be succeeded|failed", 400);
+  console.log("--- WEBHOOK INCOMING ---");
+  console.log("Body:", req.body);
 
-  const payment = await Payment.findById(paymentId);
-  if (!payment) throw new AppError("Payment not found", 404);
+  const { order_id, status_code } = req.body || {};
 
-  payment.webhookPayload = req.body || {};
-  payment.webhookReceivedAt = new Date();
-  payment.status = status === "succeeded" ? "succeeded" : "failed";
-  await payment.save();
-
-  if (payment.status === "succeeded") {
-    // Get appointment -> patientId for notifications
-    let patientId;
-    try {
-      const apptResp = await axios.get(`${config.APPOINTMENT_SERVICE_URL}/internal/appointments/${payment.appointmentId}`, {
-        headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN },
-        timeout: 5000,
-      });
-      // appointment-service response: {success, data: {appointment?} }
-      const apptData = apptResp.data?.data || apptResp.data;
-      patientId = apptData?.patientId;
-    } catch {
-      // best-effort notification
-    }
-
-    if (patientId) {
-      axios
-        .post(
-          `${config.NOTIFICATION_SERVICE_URL}/internal/payment-success`,
-          { appointmentId: payment.appointmentId, patientId, provider: payment.provider },
-          { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } }
-        )
-        .catch(() => {});
-    }
+  const payment = await Payment.findById(order_id);
+  if (!payment) {
+    console.error("Payment not found for ID:", order_id);
+    throw new AppError("Payment not found", 404);
   }
 
-  return response.sendSuccess(res, { message: "webhook received", data: { paymentId, status } });
+  payment.webhookPayload = req.body;
+  payment.webhookReceivedAt = new Date();
+
+  // Handle Statuses
+  if (status_code == "2") { 
+    payment.status = "succeeded";
+    console.log(`Payment ${order_id} marked as SUCCEEDED`);
+    
+    // SAVE NOW so the DB reflects success even if services are down
+    await payment.save();
+
+    // Try to notify other services
+    try {
+      await axios.patch(
+        `${config.APPOINTMENT_SERVICE_URL}/internal/appointments/${payment.appointmentId}/confirm`,
+        { status: "paid" },
+        { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } }
+      );
+
+      await axios.post(
+        `${config.NOTIFICATION_SERVICE_URL}/internal/payment-success`,
+        {
+          appointmentId: payment.appointmentId,
+          patientId: payment.patientId,
+        },
+        { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } }
+      );
+    } catch (err) {
+      console.error("Distributed Sync Failed (but payment saved):", err.message);
+    }
+  } else if (status_code == "0") {
+    payment.status = "pending";
+    await payment.save();
+    console.log(`Payment ${order_id} marked as PENDING`);
+  } else {
+    payment.status = "failed";
+    await payment.save();
+    console.log(`Payment ${order_id} marked as FAILED`);
+  }
+
+  return res.sendStatus(200);
 });
 
-module.exports = { initiatePayment, getPayment, webhookPayment };
+const getPayment = asyncHandler(async (req, res) => {
+  const payment = await Payment.findById(req.params.paymentId).lean();
+  if (!payment) throw new AppError("Payment not found", 404);
 
+  return response.sendSuccess(res, {
+    message: "payment",
+    data: payment,
+  });
+});
+
+module.exports = {
+  initiatePayment,
+  getPayment,
+  webhookPayment,
+};
