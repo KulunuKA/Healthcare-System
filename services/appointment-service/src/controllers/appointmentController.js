@@ -24,6 +24,7 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
 
   const bookAppointment = asyncHandler(async (req, res) => {
     const { doctorId, startAt, reason, notes } = req.body || {};
+
     if (!doctorId) throw new AppError("doctorId is required", 400);
     if (!startAt) throw new AppError("startAt is required", 400);
 
@@ -31,6 +32,7 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
       patientId: req.user.sub,
       doctorId,
       startAt: new Date(startAt),
+      isTelemedicineRequest: false,
       reason: reason || "",
       notes: notes || "",
       status: "scheduled",
@@ -100,7 +102,7 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
     else throw new AppError("Forbidden", 403);
 
     const appts = await Appointment.find(filter)
-      .sort({ startAt: -1 })
+      .sort({ createdAt: -1 })
       .lean()
       .exec();
 

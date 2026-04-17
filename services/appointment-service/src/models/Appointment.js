@@ -12,7 +12,9 @@ const AppointmentSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    startAt: { type: Date, required: true, index: true },
+    startAt: { type: Date, required: false, index: true },
+    /** True when patient submits a telemedicine request; date/time set later by the doctor. */
+    isTelemedicineRequest: { type: Boolean, default: false, index: true },
     status: {
       type: String,
       enum: ["scheduled", "accepted", "rejected", "cancelled", "completed"],

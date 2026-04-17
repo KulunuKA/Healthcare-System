@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 const API_BASE_URL = "/api/doctors";
+const TELEMEDICINE_API_BASE = "/api/telemedicine";
 
 // ─── Auth ────────────────────────────────────────────
 export function loginDoctorAPI({ email, password }) {
@@ -59,6 +60,44 @@ export function getDoctorAppointmentsAPI(token) {
   return axiosInstance.get(`${APPOINTMENT_API_BASE}/appointments`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+// ─── Telemedicine requests (telemedicine-service) ────
+export function getDoctorTelemedicineRequestsAPI(token, params = {}) {
+  return axiosInstance.get(`${TELEMEDICINE_API_BASE}/requests/doctor`, {
+    params,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getTelemedicineRequestByIdAPI(token, requestId) {
+  return axiosInstance.get(`${TELEMEDICINE_API_BASE}/requests/${requestId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function acceptTelemedicineRequestAPI(token, requestId, { scheduledAt }) {
+  return axiosInstance.patch(
+    `${TELEMEDICINE_API_BASE}/requests/${requestId}/accept`,
+    { scheduledAt },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
+export function rejectTelemedicineRequestAPI(token, requestId) {
+  return axiosInstance.patch(
+    `${TELEMEDICINE_API_BASE}/requests/${requestId}/reject`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
+export function completeTelemedicineRequestAPI(token, requestId) {
+  return axiosInstance.patch(
+    `${TELEMEDICINE_API_BASE}/requests/${requestId}/complete`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
 }
 
 // ─── Patient Reports ─────────────────────────────────
