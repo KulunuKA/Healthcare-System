@@ -68,11 +68,26 @@ export const PatientProvider = ({ children }) => {
   const fetchDoctorsBySpecialty = useCallback(async (specialty) => {
     setLoadingDoctors(true);
     try {
-      const response = await getDoctorsBySpecialtyAPI(specialty);
-      setDoctors(response.data.data || []);
-      return response.data.data || [];
+      const token = getToken();
+      const response = await getDoctorsBySpecialtyAPI(token, specialty);
+      console.log("Doctors response:", response);
+      
+      // Handle both response structures: array directly or nested in { doctors } object
+      let doctorsList = response.data?.data;
+      console.log("Doctors data extracted:", doctorsList);
+      
+      if (doctorsList && typeof doctorsList === 'object' && !Array.isArray(doctorsList)) {
+        // If it's an object with a doctors property, extract the array
+        doctorsList = doctorsList.doctors || [];
+        console.log("Extracted from nested object:", doctorsList);
+      }
+      doctorsList = Array.isArray(doctorsList) ? doctorsList : [];
+      console.log("Final doctors list:", doctorsList);
+      setDoctors(doctorsList);
+      return doctorsList;
     } catch (error) {
       console.error("Error fetching doctors:", error);
+      setDoctors([]);
       throw error;
     } finally {
       setLoadingDoctors(false);
@@ -85,12 +100,35 @@ export const PatientProvider = ({ children }) => {
     try {
       const token = getToken();
       const response = await getPatientAppointmentsAPI(token);
-      setAppointments(
-        Array.isArray(response.data.data) ? response.data.data : [],
-      );
-      return response.data.data || [];
+      console.log("Appointments response:", response);
+      
+      // Handle both response structures: array directly or nested in { appointments } object
+      let appointmentsList = response.data?.data;
+      console.log("Appointments data extracted:", appointmentsList);
+      
+      if (appointmentsList && typeof appointmentsList === 'object' && !Array.isArray(appointmentsList)) {
+        // If it's an object with an appointments property, extract the array
+        appointmentsList = appointmentsList.appointments || [];
+        console.log("Extracted from nested object:", appointmentsList);
+      }
+      appointmentsList = Array.isArray(appointmentsList) ? appointmentsList : [];
+      console.log("Final appointments list:", appointmentsList);
+      
+      // Log each appointment to see doctor data
+      appointmentsList.forEach(appt => {
+        console.log(`Appointment ${appt.id}:`, {
+          doctorId: appt.doctorId,
+          doctor: appt.doctor,
+          reason: appt.reason,
+          notes: appt.notes
+        });
+      });
+      
+      setAppointments(appointmentsList);
+      return appointmentsList;
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setAppointments([]);
       throw error;
     } finally {
       setLoadingAppointments(false);

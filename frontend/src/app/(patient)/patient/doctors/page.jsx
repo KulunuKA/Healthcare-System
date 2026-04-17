@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card, Button, Select, Input, Spin, Empty, Badge, Tag } from "antd";
+import { Card, Button, Select, Input, Spin, Empty, Badge, Tag, message } from "antd";
 import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
 import Link from "next/link";
@@ -25,6 +25,7 @@ export default function DoctorsPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fromUrl = searchParams.get("specialty");
@@ -41,14 +42,17 @@ export default function DoctorsPage() {
 
   const loadDoctors = async () => {
     try {
+      setError(null);
       await fetchDoctorsBySpecialty(selectedSpecialty);
     } catch (error) {
       console.error("Error loading doctors:", error);
+      setError("Failed to load doctors. Please try again.");
+      message.error("Failed to load doctors");
     }
   };
 
   useEffect(() => {
-    const filtered = doctors.filter(
+    const filtered = (Array.isArray(doctors) ? doctors : []).filter(
       (doctor) =>
         doctor.fullName?.toLowerCase().includes(searchText.toLowerCase()) ||
         doctor.email?.toLowerCase().includes(searchText.toLowerCase()),
@@ -111,9 +115,11 @@ export default function DoctorsPage() {
       {/* Doctors Grid */}
       {!selectedSpecialty ? (
         <Empty description="Select a specialty to view available doctors" />
+      ) : error ? (
+        <Empty description={error} />
       ) : loadingDoctors ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
-          <Spin size="large" tip="Loading doctors..." />
+          <Spin size="large" description="Loading doctors..." />
         </div>
       ) : filteredDoctors.length === 0 ? (
         <Empty description="No doctors found in this specialty" />

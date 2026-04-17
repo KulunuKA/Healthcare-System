@@ -15,7 +15,7 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
   });
 
   const bookAppointment = asyncHandler(async (req, res) => {
-    const { doctorId, startAt } = req.body || {};
+    const { doctorId, startAt, reason, notes } = req.body || {};
     if (!doctorId) throw new AppError("doctorId is required", 400);
     if (!startAt) throw new AppError("startAt is required", 400);
 
@@ -23,6 +23,8 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
       patientId: req.user.sub,
       doctorId,
       startAt: new Date(startAt),
+      reason: reason || "",
+      notes: notes || "",
       status: "scheduled",
       events: [{ type: "booked", detail: "Appointment scheduled" }],
     });
@@ -74,8 +76,28 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
     else if (role === "admin") filter = {};
     else throw new AppError("Forbidden", 403);
 
-    const appts = await Appointment.find(filter).sort({ startAt: -1 }).lean();
-    return response.sendSuccess(res, { message: "appointments", data: { appointments: appts.map(buildAppointmentPublicView) } });
+    const appts = await Appointment.find(filter)
+      .sort({ startAt: -1 })
+      .lean()
+      .exec();
+    
+    // Fetch doctor details for each appointment
+    const appointmentsWithDoctors = await Promise.all(
+      appts.map(async (appt) => {
+        try {
+          const doctorUrl = `${config.DOCTOR_SERVICE_URL}/doctors/${appt.doctorId}`;
+          const doctorRes = await axios.get(doctorUrl, { timeout: 5000 }).catch(() => null);
+          const doctorData = doctorRes?.data?.data || null;
+          console.log(`Fetched doctor ${appt.doctorId}:`, doctorData);
+          return buildAppointmentPublicView(appt, doctorData);
+        } catch (err) {
+          console.error(`Failed to fetch doctor ${appt.doctorId}:`, err.message);
+          return buildAppointmentPublicView(appt, null);
+        }
+      })
+    );
+    
+    return response.sendSuccess(res, { message: "appointments", data: { appointments: appointmentsWithDoctors } });
   });
 
   const statusStream = asyncHandler(async (req, res) => {

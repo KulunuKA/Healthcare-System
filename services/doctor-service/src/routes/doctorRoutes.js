@@ -4,6 +4,7 @@ const doctorController = require("../controllers/doctorController");
 
 const router = express.Router();
 
+router.get("/doctors/:doctorId", doctorController.getDoctorById);
 router.get("/doctors", doctorController.listDoctors);
 router.put("/availability", requireAuth, requireRole("doctor"), doctorController.setAvailability);
 router.post("/appointments/:appointmentId/decision", requireAuth, requireRole("doctor"), doctorController.decision);

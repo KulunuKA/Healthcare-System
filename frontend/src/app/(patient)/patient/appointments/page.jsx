@@ -50,6 +50,7 @@ export default function AppointmentsPage() {
   } = usePatient();
   const [loading, setLoading] = useState(true);
   const [cancelingId, setCancelingId] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadAppointments();
@@ -58,9 +59,11 @@ export default function AppointmentsPage() {
   const loadAppointments = async () => {
     try {
       setLoading(true);
+      setError(null);
       await fetchPatientAppointments();
     } catch (error) {
       console.error("Error loading appointments:", error);
+      setError("Failed to load appointments");
       message.error("Failed to load appointments");
     } finally {
       setLoading(false);
@@ -99,7 +102,7 @@ export default function AppointmentsPage() {
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <Spin size="large" tip="Loading appointments..." />
+        <Spin size="large" description="Loading appointments..." />
       </div>
     );
   }
@@ -127,7 +130,7 @@ export default function AppointmentsPage() {
 
       {(Array.isArray(appointments) ? appointments : []).length === 0 ? (
         <Empty
-          description="No appointments found"
+          description={error || "No appointments found"}
           style={{ marginTop: "50px" }}
         />
       ) : (
@@ -167,7 +170,7 @@ export default function AppointmentsPage() {
                         margin: 0,
                       }}
                     >
-                      Dr. {appointment.doctorId?.fullName || "Unknown"}
+                      {appointment.doctor?.fullName || "Unknown"}
                     </h3>
                     <Tag color={statusColors[appointment.status]}>
                       {statusLabels[appointment.status]}
@@ -176,7 +179,7 @@ export default function AppointmentsPage() {
                   <p
                     style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
                   >
-                    {appointment.doctorId?.specialty || "General Practice"}
+                    {appointment.doctor?.specialty || "General Practice"}
                   </p>
                 </div>
 

@@ -12,6 +12,8 @@ const AppointmentSchema = new mongoose.Schema(
       index: true,
     },
     statusUpdatedAt: { type: Date, default: Date.now },
+    reason: { type: String, default: "" },
+    notes: { type: String, default: "" },
     // Basic audit trail for debugging and monitoring
     events: [
       {

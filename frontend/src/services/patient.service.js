@@ -9,7 +9,7 @@ export function registerPatientAPI(patientData) {
   return axiosInstance.post(`${API_BASE_URL}/auth/register`, patientData);
 }
 
-export function loginPatientAPI(email, password) {
+export function loginPatientAPI({ email, password }) {
   return axiosInstance.post(`${API_BASE_URL}/auth/login`, {
     email,
     password,
