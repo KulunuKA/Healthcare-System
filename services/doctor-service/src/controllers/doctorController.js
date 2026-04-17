@@ -5,7 +5,7 @@ const doctorService = require("../services/doctorService");
 
 const listDoctors = asyncHandler(async (req, res) => {
   const doctors = await doctorService.listDoctors({ specialty: req.query.specialty });
-  return response.sendSuccess(res, { message: "doctors", data: { doctors } });
+  return response.sendSuccess(res, { message: "doctors", data: doctors });
 });
 
 const setAvailability = asyncHandler(async (req, res) => {

@@ -28,6 +28,8 @@ function createApp() {
       // Public auth endpoints
       if (req.path.startsWith("/api/patients/auth/")) return true;
       if (req.path.startsWith("/api/doctors/auth/")) return true;
+      // Public doctor listing (for patients to view available doctors)
+      if (req.path === "/api/doctors/doctors" && req.method === "GET") return true;
       // Webhooks should be accessible without user JWT (they authenticate via provider secret)
       if (req.path.startsWith("/api/payments/webhooks/")) return true;
       if (req.path === "/health" || req.path === "/") return true;

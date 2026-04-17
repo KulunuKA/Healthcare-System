@@ -31,6 +31,7 @@ export default function AdminRegisterDoctorPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [specialty, setSpecialty] = useState("");
+  const [offerTelemedicine, setOfferTelemedicine] = useState(false);
   const [loading, setLoading] = useState(false);
   const { registerDoctor } = useDoctor();
 
@@ -52,10 +53,10 @@ export default function AdminRegisterDoctorPage() {
 
     setLoading(true);
     try {
-      await registerDoctor({ email, password, fullName, specialty });
+      await registerDoctor({ email, password, fullName, specialty, offerTelemedicine });
       message.success("Registration successful!");
     } catch (err) {
-      const msg = err?.message || err?.error || "Registration failed";
+      const msg = typeof err === 'string' ? err : (err?.message || err?.error || "Registration failed");
       message.error(msg);
     } finally {
       setLoading(false);
@@ -148,6 +149,20 @@ export default function AdminRegisterDoctorPage() {
           label="Confirm Password"
           required
         />
+
+        <div className="flex items-center gap-3 rounded-lg border border-gray-300 p-4">
+          <input
+            type="checkbox"
+            id="telemedicine"
+            checked={offerTelemedicine}
+            onChange={(e) => setOfferTelemedicine(e.target.checked)}
+            className="w-4 h-4 rounded cursor-pointer"
+          />
+          <label htmlFor="telemedicine" className="cursor-pointer flex flex-col gap-1">
+            <span className="font-semibold text-sm text-gray-900">Offer Remote Consultation</span>
+            <span className="text-xs text-gray-500">Offer remote consultation through the platform</span>
+          </label>
+        </div>
 
         <div style={{ marginTop: "8px" }}>
           <Button type="submit" loading={loading}>

@@ -44,11 +44,15 @@ export const DoctorProvider = ({ children }) => {
         };
         await setSession("user", JSON.stringify(userObj));
         setUser(userObj);
-        router.push("/doctor/dashboard");
+        router.push("/admin/doctors");
       }
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message || "Registration failed";
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.message || 
+        "Registration failed";
+      throw errorMessage;
     }
   };
 
@@ -72,7 +76,11 @@ export const DoctorProvider = ({ children }) => {
       }
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message || "Login failed";
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.message || 
+        "Login failed";
+      throw errorMessage;
     }
   };
 

@@ -10,7 +10,7 @@ function signToken({ doctorId, email }) {
   });
 }
 
-async function register({ email, password, fullName, specialty }) {
+async function register({ email, password, fullName, specialty, offerTelemedicine }) {
   if (!email || !password) throw new AppError("Email and password are required", 400);
 
   const existing = await Doctor.findOne({ email }).lean();
@@ -22,6 +22,7 @@ async function register({ email, password, fullName, specialty }) {
     passwordHash,
     fullName: fullName || "",
     specialty: specialty || "",
+    offerTelemedicine: offerTelemedicine || false,
   });
 
   return { doctor, token: signToken({ doctorId: doctor._id, email: doctor.email }) };
@@ -35,7 +36,7 @@ async function login({ email, password }) {
   if (!ok) throw new AppError("Invalid credentials", 401);
 
   return {
-    doctor: { id: doctor._id, email: doctor.email, fullName: doctor.fullName, specialty: doctor.specialty, verified: doctor.verified },
+    doctor: { id: doctor._id, email: doctor.email, fullName: doctor.fullName, specialty: doctor.specialty, offerTelemedicine: doctor.offerTelemedicine, verified: doctor.verified },
     token: signToken({ doctorId: doctor._id, email: doctor.email }),
   };
 }
