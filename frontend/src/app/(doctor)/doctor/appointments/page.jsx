@@ -77,19 +77,19 @@ export default function DoctorAppointmentsPage() {
   };
 
   const getPendingAppointments = () =>
-    appointments.filter((a) => a.status === "scheduled");
+    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "scheduled");
 
   const getAcceptedAppointments = () =>
-    appointments.filter((a) => a.status === "accepted");
+    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "accepted");
 
   const getRejectedAppointments = () =>
-    appointments.filter((a) => a.status === "rejected");
+    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "rejected");
 
   const getCancelledAppointments = () =>
-    appointments.filter((a) => a.status === "cancelled");
+    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "cancelled");
 
   const getCompletedAppointments = () =>
-    appointments.filter((a) => a.status === "completed");
+    (Array.isArray(appointments) ? appointments : []).filter((a) => a.status === "completed");
 
   const AppointmentCard = ({ appointment, showActions = false }) => (
     <Card

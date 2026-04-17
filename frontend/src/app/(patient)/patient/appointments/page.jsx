@@ -125,7 +125,7 @@ export default function AppointmentsPage() {
         </Link>
       </div>
 
-      {appointments.length === 0 ? (
+      {(Array.isArray(appointments) ? appointments : []).length === 0 ? (
         <Empty
           description="No appointments found"
           style={{ marginTop: "50px" }}
@@ -138,7 +138,7 @@ export default function AppointmentsPage() {
             gap: "20px",
           }}
         >
-          {appointments.map((appointment) => (
+          {(Array.isArray(appointments) ? appointments : []).map((appointment) => (
             <Card
               key={appointment._id || appointment.id}
               hoverable
