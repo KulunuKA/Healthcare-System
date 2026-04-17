@@ -10,6 +10,13 @@ const listDoctors = asyncHandler(async (req, res) => {
   return response.sendSuccess(res, { message: "doctors", data: doctors });
 });
 
+const getDoctorById = asyncHandler(async (req, res) => {
+  const doctorId = req.params.doctorId;
+  if (!doctorId) throw new AppError("doctorId is required", 400);
+  const doctor = await doctorService.getProfile(doctorId);
+  return response.sendSuccess(res, { message: "doctor", data: doctor });
+});
+
 const setAvailability = asyncHandler(async (req, res) => {
   const updated = await doctorService.setAvailability(req.user.sub, {
     slots: req.body?.slots,
@@ -63,6 +70,7 @@ const issuePrescription = asyncHandler(async (req, res) => {
 
 module.exports = {
   listDoctors,
+  getDoctorById,
   setAvailability,
   decision,
   viewPatientReports,
