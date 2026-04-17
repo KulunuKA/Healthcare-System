@@ -125,7 +125,7 @@ export default function AppointmentsPage() {
         </Link>
       </div>
 
-      {appointments.length === 0 ? (
+      {(Array.isArray(appointments) ? appointments : []).length === 0 ? (
         <Empty
           description="No appointments found"
           style={{ marginTop: "50px" }}
@@ -138,142 +138,162 @@ export default function AppointmentsPage() {
             gap: "20px",
           }}
         >
-          {appointments.map((appointment) => (
-            <Card
-              key={appointment._id || appointment.id}
-              hoverable
-              style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                borderLeft: `4px solid ${statusColors[appointment.status] || "default"}`,
-              }}
-            >
-              {/* Header */}
-              <div style={{ marginBottom: "15px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <h3
-                    style={{ fontSize: "18px", fontWeight: "bold", margin: 0 }}
+          {(Array.isArray(appointments) ? appointments : []).map(
+            (appointment) => (
+              <Card
+                key={appointment._id || appointment.id}
+                hoverable
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderLeft: `4px solid ${statusColors[appointment.status] || "default"}`,
+                }}
+              >
+                {/* Header */}
+                <div style={{ marginBottom: "15px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "start",
+                      marginBottom: "10px",
+                    }}
                   >
-                    Dr. {appointment.doctorId?.fullName || "Unknown"}
-                  </h3>
-                  <Tag color={statusColors[appointment.status]}>
-                    {statusLabels[appointment.status]}
-                  </Tag>
-                </div>
-                <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
-                  {appointment.doctorId?.specialty || "General Practice"}
-                </p>
-              </div>
-
-              {/* Details */}
-              <div style={{ marginBottom: "15px", flex: 1 }}>
-                <p
-                  style={{
-                    margin: "8px 0",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <CalendarOutlined
-                    style={{ marginRight: "8px", color: "#1890ff" }}
-                  />
-                  <strong>Date:</strong>{" "}
-                  {dayjs(appointment.startAt).format("MMM DD, YYYY")}
-                </p>
-                <p
-                  style={{
-                    margin: "8px 0",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <ClockCircleOutlined
-                    style={{ marginRight: "8px", color: "#1890ff" }}
-                  />
-                  <strong>Time:</strong>{" "}
-                  {dayjs(appointment.startAt).format("HH:mm")}
-                </p>
-                {appointment.reason && (
+                    <h3
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                        margin: 0,
+                      }}
+                    >
+                      Dr. {appointment.doctorId?.fullName || "Unknown"}
+                    </h3>
+                    <Tag color={statusColors[appointment.status]}>
+                      {statusLabels[appointment.status]}
+                    </Tag>
+                  </div>
                   <p
-                    style={{ margin: "8px 0", color: "#666", fontSize: "14px" }}
+                    style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
                   >
-                    <strong>Reason:</strong> {appointment.reason}
+                    {appointment.doctorId?.specialty || "General Practice"}
                   </p>
-                )}
-                <p style={{ margin: "8px 0", color: "#999", fontSize: "12px" }}>
-                  <strong>Booked:</strong>{" "}
-                  {dayjs(appointment.createdAt).fromNow()}
-                </p>
-              </div>
+                </div>
 
-              {/* Status Message */}
-              {appointment.status === "rejected" && (
-                <Card
-                  style={{
-                    backgroundColor: "#fff2f0",
-                    marginBottom: "15px",
-                    border: "1px solid #ffccc7",
-                    padding: "8px 12px",
-                  }}
-                >
-                  <p style={{ margin: 0, color: "#cf1322", fontSize: "13px" }}>
-                    This appointment request was declined by the doctor.
-                  </p>
-                </Card>
-              )}
-
-              {appointment.status === "accepted" && (
-                <Card
-                  style={{
-                    backgroundColor: "#f6ffed",
-                    marginBottom: "15px",
-                    border: "1px solid #b7eb8f",
-                    padding: "8px 12px",
-                  }}
-                >
-                  <p style={{ margin: 0, color: "#274e0f", fontSize: "13px" }}>
-                    ✓ This appointment is confirmed. Doctor will see you on the
-                    scheduled date/time.
-                  </p>
-                </Card>
-              )}
-
-              {/* Actions */}
-              <div style={{ display: "flex", gap: "10px" }}>
-                <Tooltip title="View Details">
-                  <Button
-                    icon={<EyeOutlined />}
-                    type="default"
-                    block
-                    disabled={appointment.status === "cancelled"}
-                  />
-                </Tooltip>
-                {canCancel(appointment) && (
-                  <Button
-                    icon={<DeleteOutlined />}
-                    danger
-                    block
-                    loading={
-                      cancelingId === (appointment._id || appointment.id)
-                    }
-                    onClick={() =>
-                      handleCancelAppointment(appointment._id || appointment.id)
-                    }
+                {/* Details */}
+                <div style={{ marginBottom: "15px", flex: 1 }}>
+                  <p
+                    style={{
+                      margin: "8px 0",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
-                    Cancel
-                  </Button>
+                    <CalendarOutlined
+                      style={{ marginRight: "8px", color: "#1890ff" }}
+                    />
+                    <strong>Date:</strong>{" "}
+                    {dayjs(appointment.startAt).format("MMM DD, YYYY")}
+                  </p>
+                  <p
+                    style={{
+                      margin: "8px 0",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ClockCircleOutlined
+                      style={{ marginRight: "8px", color: "#1890ff" }}
+                    />
+                    <strong>Time:</strong>{" "}
+                    {dayjs(appointment.startAt).format("HH:mm")}
+                  </p>
+                  {appointment.reason && (
+                    <p
+                      style={{
+                        margin: "8px 0",
+                        color: "#666",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <strong>Reason:</strong> {appointment.reason}
+                    </p>
+                  )}
+                  <p
+                    style={{ margin: "8px 0", color: "#999", fontSize: "12px" }}
+                  >
+                    <strong>Booked:</strong>{" "}
+                    {dayjs(appointment.createdAt).fromNow()}
+                  </p>
+                </div>
+
+                {/* Status Message */}
+                {appointment.status === "rejected" && (
+                  <Card
+                    style={{
+                      backgroundColor: "#fff2f0",
+                      marginBottom: "15px",
+                      border: "1px solid #ffccc7",
+                      padding: "8px 12px",
+                    }}
+                  >
+                    <p
+                      style={{ margin: 0, color: "#cf1322", fontSize: "13px" }}
+                    >
+                      This appointment request was declined by the doctor.
+                    </p>
+                  </Card>
                 )}
-              </div>
-            </Card>
-          ))}
+
+                {appointment.status === "accepted" && (
+                  <Card
+                    style={{
+                      backgroundColor: "#f6ffed",
+                      marginBottom: "15px",
+                      border: "1px solid #b7eb8f",
+                      padding: "8px 12px",
+                    }}
+                  >
+                    <p
+                      style={{ margin: 0, color: "#274e0f", fontSize: "13px" }}
+                    >
+                      ✓ This appointment is confirmed. Doctor will see you on
+                      the scheduled date/time.
+                    </p>
+                  </Card>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <Tooltip title="View Details">
+                    <Button
+                      icon={<EyeOutlined />}
+                      type="default"
+                      block
+                      disabled={appointment.status === "cancelled"}
+                    />
+                  </Tooltip>
+                  {canCancel(appointment) && (
+                    <Button
+                      icon={<DeleteOutlined />}
+                      danger
+                      block
+                      loading={
+                        cancelingId === (appointment._id || appointment.id)
+                      }
+                      onClick={() =>
+                        handleCancelAppointment(
+                          appointment._id || appointment.id,
+                        )
+                      }
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            ),
+          )}
         </div>
       )}
     </div>
