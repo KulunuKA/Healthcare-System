@@ -2,6 +2,7 @@ const axios = require("axios");
 const { AppError } = require("@hc/shared");
 const config = require("../config");
 const repo = require("../repositories/telemedicineRequest.repository");
+const partyLookup = require("./partyLookup.service");
 const { generateMeetingLink } = require("../utils/generateMeetingLink");
 const {
   serializeTelemedicineRequest,
@@ -25,6 +26,23 @@ async function fetchDoctorForValidation(doctorId) {
   }
 }
 
+async function attachPartyInfo(base, mode) {
+  const out = { ...base };
+  if (mode === "patient" || mode === "admin") {
+    out.doctor =
+      (await partyLookup.fetchDoctorSummary(out.doctorId)) || {
+        id: String(out.doctorId),
+      };
+  }
+  if (mode === "doctor" || mode === "admin") {
+    out.patient =
+      (await partyLookup.fetchPatientSummary(out.patientId)) || {
+        id: String(out.patientId),
+      };
+  }
+  return out;
+}
+
 async function createRequest({ patientId, doctorId, reason, notes }) {
   const r = typeof reason === "string" ? reason.trim() : "";
   if (!r) throw new AppError("reason is required", 400);
@@ -43,7 +61,8 @@ async function createRequest({ patientId, doctorId, reason, notes }) {
     status: "pending",
   });
 
-  return serializeTelemedicineRequest(doc);
+  const s = serializeTelemedicineRequest(doc);
+  return attachPartyInfo(s, "patient");
 }
 
 function assertOwnership(req, row) {
@@ -62,23 +81,47 @@ async function getByIdForUser(req, id) {
   const row = await repo.findById(id);
   if (!row) throw new AppError("Request not found", 404);
   assertOwnership(req, row);
-  const serialized = serializeTelemedicineRequest(row);
+  let serialized = serializeTelemedicineRequest(row);
   if (req.user.role === "patient") {
-    return scrubMeetingLinkForPatient(serialized);
+    serialized = scrubMeetingLinkForPatient(serialized);
   }
-  return serialized;
+  const mode =
+    req.user.role === "admin"
+      ? "admin"
+      : req.user.role === "doctor"
+        ? "doctor"
+        : "patient";
+  return attachPartyInfo(serialized, mode);
 }
 
 async function listForPatient(patientId) {
   const rows = await repo.findByPatientId(patientId);
-  return rows.map((row) =>
-    scrubMeetingLinkForPatient(serializeTelemedicineRequest(row)),
+  return Promise.all(
+    rows.map(async (row) => {
+      const s = scrubMeetingLinkForPatient(serializeTelemedicineRequest(row));
+      return attachPartyInfo(s, "patient");
+    }),
   );
 }
 
 async function listAllForDoctor(doctorId, { status } = {}) {
   const rows = await repo.findByDoctorId(doctorId, { status });
-  return rows.map((row) => serializeTelemedicineRequest(row));
+  return Promise.all(
+    rows.map(async (row) => {
+      const s = serializeTelemedicineRequest(row);
+      return attachPartyInfo(s, "doctor");
+    }),
+  );
+}
+
+async function listForAdmin({ status } = {}) {
+  const rows = await repo.findAll({ status });
+  return Promise.all(
+    rows.map(async (row) => {
+      const s = serializeTelemedicineRequest(row);
+      return attachPartyInfo(s, "admin");
+    }),
+  );
 }
 
 async function acceptRequest({ requestId, doctorId, scheduledAt }) {
@@ -102,7 +145,8 @@ async function acceptRequest({ requestId, doctorId, scheduledAt }) {
     respondedAt: new Date(),
   });
 
-  return serializeTelemedicineRequest(updated);
+  const s = serializeTelemedicineRequest(updated);
+  return attachPartyInfo(s, "doctor");
 }
 
 async function rejectRequest({ requestId, doctorId }) {
@@ -118,7 +162,8 @@ async function rejectRequest({ requestId, doctorId }) {
     respondedAt: new Date(),
   });
 
-  return serializeTelemedicineRequest(updated);
+  const s = serializeTelemedicineRequest(updated);
+  return attachPartyInfo(s, "doctor");
 }
 
 async function cancelRequest({ requestId, patientId }) {
@@ -134,7 +179,8 @@ async function cancelRequest({ requestId, patientId }) {
     respondedAt: new Date(),
   });
 
-  return serializeTelemedicineRequest(updated);
+  const s = serializeTelemedicineRequest(updated);
+  return attachPartyInfo(s, "patient");
 }
 
 async function completeRequest({ requestId, doctorId }) {
@@ -150,7 +196,8 @@ async function completeRequest({ requestId, doctorId }) {
     respondedAt: new Date(),
   });
 
-  return serializeTelemedicineRequest(updated);
+  const s = serializeTelemedicineRequest(updated);
+  return attachPartyInfo(s, "doctor");
 }
 
 module.exports = {
@@ -158,6 +205,7 @@ module.exports = {
   getByIdForUser,
   listForPatient,
   listAllForDoctor,
+  listForAdmin,
   acceptRequest,
   rejectRequest,
   cancelRequest,

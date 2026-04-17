@@ -35,6 +35,17 @@ const listForDoctor = asyncHandler(async (req, res) => {
   });
 });
 
+const listForAdmin = asyncHandler(async (req, res) => {
+  const { status } = req.query;
+  const list = await tmRequestService.listForAdmin({
+    status: status || undefined,
+  });
+  return response.sendSuccess(res, {
+    message: "ok",
+    data: { requests: list },
+  });
+});
+
 const getById = asyncHandler(async (req, res) => {
   const data = await tmRequestService.getByIdForUser(req, req.params.id);
   return response.sendSuccess(res, {
@@ -93,6 +104,7 @@ module.exports = {
   createRequest,
   listMine,
   listForDoctor,
+  listForAdmin,
   getById,
   accept,
   reject,

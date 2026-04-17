@@ -55,6 +55,14 @@ export function getMyTelemedicineRequestsAPI(token) {
   });
 }
 
+export function cancelTelemedicineRequestAPI(token, requestId) {
+  return axiosInstance.patch(
+    `${TELEMEDICINE_API_BASE}/requests/${requestId}/cancel`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+}
+
 // ─── Appointments ────────────────────────────────────
 export function bookAppointmentAPI(token, appointmentData) {
   return axiosInstance.post(

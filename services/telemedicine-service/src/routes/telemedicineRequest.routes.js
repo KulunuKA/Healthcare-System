@@ -25,6 +25,13 @@ router.get(
   controller.listForDoctor,
 );
 
+router.get(
+  "/admin",
+  requireAuth,
+  requireRole("admin"),
+  controller.listForAdmin,
+);
+
 router.get("/:id", requireAuth, controller.getById);
 
 router.patch(

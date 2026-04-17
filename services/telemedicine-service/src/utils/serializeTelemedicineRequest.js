@@ -11,6 +11,8 @@ function serializeTelemedicineRequest(doc) {
       : JSON.parse(JSON.stringify(doc));
   o.id = String(o._id);
   delete o.__v;
+  if (o.patientId != null) o.patientId = String(o.patientId);
+  if (o.doctorId != null) o.doctorId = String(o.doctorId);
 
   if (o.scheduledAt && o.meetingLink) {
     const sched = new Date(o.scheduledAt);

@@ -21,6 +21,12 @@ async function findByDoctorId(doctorId, { status, limit = 100 } = {}) {
   return TelemedicineRequest.find(q).sort({ createdAt: -1 }).limit(limit).lean();
 }
 
+async function findAll({ status, limit = 200 } = {}) {
+  const q = {};
+  if (status) q.status = status;
+  return TelemedicineRequest.find(q).sort({ createdAt: -1 }).limit(limit).lean();
+}
+
 async function updateById(id, patch) {
   return TelemedicineRequest.findByIdAndUpdate(id, patch, {
     new: true,
@@ -33,5 +39,6 @@ module.exports = {
   findById,
   findByPatientId,
   findByDoctorId,
+  findAll,
   updateById,
 };

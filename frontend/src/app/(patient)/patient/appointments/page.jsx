@@ -10,14 +10,15 @@ import {
   Modal,
   message,
   Tooltip,
-  Badge,
 } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   EyeOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
+import PatientTmRequestCard from "@/components/telemedicine/PatientTmRequestCard";
 import { usePatient } from "@/context/PatientProvider";
 import Link from "next/link";
 import dayjs from "dayjs";
@@ -44,25 +45,31 @@ const statusLabels = {
 export default function AppointmentsPage() {
   const {
     fetchPatientAppointments,
+    fetchTelemedicineRequests,
     cancelAppointment,
+    cancelTelemedicineRequest,
     appointments,
-    loadingAppointments,
+    telemedicineRequests,
   } = usePatient();
   const [loading, setLoading] = useState(true);
   const [cancelingId, setCancelingId] = useState(null);
+  const [cancelingTmId, setCancelingTmId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadAppointments();
+    loadAll();
   }, []);
 
-  const loadAppointments = async () => {
+  const loadAll = async () => {
     try {
       setLoading(true);
       setError(null);
-      await fetchPatientAppointments();
-    } catch (error) {
-      console.error("Error loading appointments:", error);
+      await Promise.all([
+        fetchPatientAppointments(),
+        fetchTelemedicineRequests(),
+      ]);
+    } catch (err) {
+      console.error("Error loading data:", err);
       setError("Failed to load appointments");
       message.error("Failed to load appointments");
     } finally {
@@ -82,10 +89,10 @@ export default function AppointmentsPage() {
         try {
           await cancelAppointment(appointmentId);
           message.success("Appointment cancelled successfully");
-          await loadAppointments();
-        } catch (error) {
-          console.error("Error cancelling appointment:", error);
-          message.error(error.message || "Failed to cancel appointment");
+          await loadAll();
+        } catch (err) {
+          console.error("Error cancelling appointment:", err);
+          message.error(err.message || "Failed to cancel appointment");
         } finally {
           setCancelingId(null);
         }
@@ -93,11 +100,42 @@ export default function AppointmentsPage() {
     });
   };
 
-  const canCancel = (appointment) => {
+  const handleCancelTmRequest = (requestId) => {
+    Modal.confirm({
+      title: "Cancel telemedicine request",
+      content:
+        "Are you sure you want to cancel this request? The doctor has not scheduled a session yet.",
+      okText: "Yes",
+      cancelText: "No",
+      okType: "danger",
+      onOk: async () => {
+        setCancelingTmId(requestId);
+        try {
+          await cancelTelemedicineRequest(requestId);
+          message.success("Request cancelled");
+          await loadAll();
+        } catch (err) {
+          console.error(err);
+          message.error(
+            err?.message || "Failed to cancel telemedicine request",
+          );
+        } finally {
+          setCancelingTmId(null);
+        }
+      },
+    });
+  };
+
+  const canCancelAppointment = (appointment) => {
     return (
       appointment.status !== "cancelled" && appointment.status !== "completed"
     );
   };
+
+  const apptList = Array.isArray(appointments) ? appointments : [];
+  const tmList = Array.isArray(telemedicineRequests)
+    ? telemedicineRequests
+    : [];
 
   if (loading) {
     return (
@@ -106,6 +144,8 @@ export default function AppointmentsPage() {
       </div>
     );
   }
+
+  const emptyAll = apptList.length === 0 && tmList.length === 0;
 
   return (
     <div style={{ padding: "20px", maxWidth: "1000px", margin: "0 auto" }}>
@@ -128,198 +168,281 @@ export default function AppointmentsPage() {
         </Link>
       </div>
 
-      {(Array.isArray(appointments) ? appointments : []).length === 0 ? (
+      {emptyAll ? (
         <Empty
-          description={error || "No appointments found"}
+          description={error || "No appointments or telemedicine requests yet"}
           style={{ marginTop: "50px" }}
         />
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          {(Array.isArray(appointments) ? appointments : []).map(
-            (appointment) => (
-              <Card
-                key={appointment._id || appointment.id}
-                hoverable
+        <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+          {/* Telemedicine requests */}
+          <section>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                marginBottom: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <VideoCameraOutlined style={{ color: "#722ed1" }} />
+              Telemedicine requests
+            </h2>
+            <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px", maxWidth: "640px", lineHeight: 1.6 }}>
+              Remote consultation requests and approved sessions use the cards
+              below. Meeting links unlock within two days of the scheduled time.
+            </p>
+            {tmList.length === 0 ? (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="No telemedicine requests yet"
+              />
+            ) : (
+              <div
                 style={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  borderLeft: `4px solid ${statusColors[appointment.status] || "default"}`,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                  gap: "14px",
                 }}
               >
-                {/* Header */}
-                <div style={{ marginBottom: "15px" }}>
-                  <div
+                {tmList.map((req) => (
+                  <PatientTmRequestCard
+                    key={req.id || req._id}
+                    req={req}
+                    cancelingTmId={cancelingTmId}
+                    onCancelRequest={handleCancelTmRequest}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* In-person appointments */}
+          <section>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                marginBottom: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <CalendarOutlined style={{ color: "#1890ff" }} />
+              Clinic appointments
+            </h2>
+            {apptList.length === 0 ? (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="No in-person appointments yet"
+              />
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+                  gap: "20px",
+                }}
+              >
+                {apptList.map((appointment) => (
+                  <Card
+                    key={appointment._id || appointment.id}
+                    hoverable
                     style={{
+                      height: "100%",
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                      marginBottom: "10px",
+                      flexDirection: "column",
+                      borderLeft: `4px solid ${statusColors[appointment.status] || "default"}`,
                     }}
                   >
-                    <h3
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: "bold",
-                        margin: 0,
-                      }}
-                    >
-                      {appointment.doctor?.fullName || "Unknown"}
-                    </h3>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      {appointment.isTelemedicineRequest ? (
-                        <Tag color="purple">Telemedicine</Tag>
-                      ) : null}
-                      <Tag color={statusColors[appointment.status]}>
-                        {statusLabels[appointment.status]}
-                      </Tag>
+                    <div style={{ marginBottom: "15px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <h3
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: "bold",
+                            margin: 0,
+                          }}
+                        >
+                          {appointment.doctor?.fullName || "Unknown"}
+                        </h3>
+                        <Tag color={statusColors[appointment.status]}>
+                          {statusLabels[appointment.status]}
+                        </Tag>
+                      </div>
+                      <p
+                        style={{
+                          margin: "5px 0",
+                          color: "#666",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {appointment.doctor?.specialty || "General Practice"}
+                      </p>
                     </div>
-                  </div>
-                  <p
-                    style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
-                  >
-                    {appointment.doctor?.specialty || "General Practice"}
-                  </p>
-                </div>
 
-                {/* Details */}
-                <div style={{ marginBottom: "15px", flex: 1 }}>
-                  {appointment.startAt ? (
-                    <>
+                    <div style={{ marginBottom: "15px", flex: 1 }}>
+                      {appointment.startAt ? (
+                        <>
+                          <p
+                            style={{
+                              margin: "8px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <CalendarOutlined
+                              style={{
+                                marginRight: "8px",
+                                color: "#1890ff",
+                              }}
+                            />
+                            <strong>Date:</strong>{" "}
+                            {dayjs(appointment.startAt).format("MMM DD, YYYY")}
+                          </p>
+                          <p
+                            style={{
+                              margin: "8px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <ClockCircleOutlined
+                              style={{
+                                marginRight: "8px",
+                                color: "#1890ff",
+                              }}
+                            />
+                            <strong>Time:</strong>{" "}
+                            {dayjs(appointment.startAt).format("HH:mm")}
+                          </p>
+                        </>
+                      ) : (
+                        <p
+                          style={{
+                            margin: "8px 0",
+                            color: "#531dab",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <CalendarOutlined
+                            style={{
+                              marginRight: "8px",
+                              color: "#722ed1",
+                            }}
+                          />
+                          <strong>Date & time:</strong> Pending
+                        </p>
+                      )}
+                      {appointment.reason && (
+                        <p
+                          style={{
+                            margin: "8px 0",
+                            color: "#666",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <strong>Reason:</strong> {appointment.reason}
+                        </p>
+                      )}
                       <p
                         style={{
                           margin: "8px 0",
-                          display: "flex",
-                          alignItems: "center",
+                          color: "#999",
+                          fontSize: "12px",
                         }}
                       >
-                        <CalendarOutlined
-                          style={{ marginRight: "8px", color: "#1890ff" }}
-                        />
-                        <strong>Date:</strong>{" "}
-                        {dayjs(appointment.startAt).format("MMM DD, YYYY")}
+                        <strong>Booked:</strong>{" "}
+                        {appointment.createdAt
+                          ? dayjs(appointment.createdAt).fromNow()
+                          : "—"}
                       </p>
-                      <p
+                    </div>
+
+                    {appointment.status === "rejected" && (
+                      <Card
+                        size="small"
                         style={{
-                          margin: "8px 0",
-                          display: "flex",
-                          alignItems: "center",
+                          backgroundColor: "#fff2f0",
+                          marginBottom: "15px",
+                          border: "1px solid #ffccc7",
                         }}
                       >
-                        <ClockCircleOutlined
-                          style={{ marginRight: "8px", color: "#1890ff" }}
+                        <p
+                          style={{
+                            margin: 0,
+                            color: "#cf1322",
+                            fontSize: "13px",
+                          }}
+                        >
+                          This appointment request was declined by the doctor.
+                        </p>
+                      </Card>
+                    )}
+
+                    {appointment.status === "accepted" && (
+                      <Card
+                        size="small"
+                        style={{
+                          backgroundColor: "#f6ffed",
+                          marginBottom: "15px",
+                          border: "1px solid #b7eb8f",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: 0,
+                            color: "#274e0f",
+                            fontSize: "13px",
+                          }}
+                        >
+                          ✓ Confirmed — see you at the scheduled time.
+                        </p>
+                      </Card>
+                    )}
+
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <Tooltip title="View Details">
+                        <Button
+                          icon={<EyeOutlined />}
+                          type="default"
+                          block
+                          disabled={appointment.status === "cancelled"}
                         />
-                        <strong>Time:</strong>{" "}
-                        {dayjs(appointment.startAt).format("HH:mm")}
-                      </p>
-                    </>
-                  ) : (
-                    <p
-                      style={{
-                        margin: "8px 0",
-                        color: "#531dab",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <CalendarOutlined
-                        style={{ marginRight: "8px", color: "#722ed1" }}
-                      />
-                      <strong>Date & time:</strong> Pending — the doctor
-                      will confirm and send a meeting link.
-                    </p>
-                  )}
-                  {appointment.reason && (
-                    <p
-                      style={{
-                        margin: "8px 0",
-                        color: "#666",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <strong>Reason:</strong> {appointment.reason}
-                    </p>
-                  )}
-                  <p
-                    style={{ margin: "8px 0", color: "#999", fontSize: "12px" }}
-                  >
-                    <strong>Booked:</strong>{" "}
-                    {dayjs(appointment.createdAt).fromNow()}
-                  </p>
-                </div>
-
-                {/* Status Message */}
-                {appointment.status === "rejected" && (
-                  <Card
-                    style={{
-                      backgroundColor: "#fff2f0",
-                      marginBottom: "15px",
-                      border: "1px solid #ffccc7",
-                      padding: "8px 12px",
-                    }}
-                  >
-                    <p
-                      style={{ margin: 0, color: "#cf1322", fontSize: "13px" }}
-                    >
-                      This appointment request was declined by the doctor.
-                    </p>
+                      </Tooltip>
+                      {canCancelAppointment(appointment) && (
+                        <Button
+                          icon={<DeleteOutlined />}
+                          danger
+                          block
+                          loading={
+                            cancelingId === (appointment._id || appointment.id)
+                          }
+                          onClick={() =>
+                            handleCancelAppointment(
+                              appointment._id || appointment.id,
+                            )
+                          }
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </Card>
-                )}
-
-                {appointment.status === "accepted" && (
-                  <Card
-                    style={{
-                      backgroundColor: "#f6ffed",
-                      marginBottom: "15px",
-                      border: "1px solid #b7eb8f",
-                      padding: "8px 12px",
-                    }}
-                  >
-                    <p
-                      style={{ margin: 0, color: "#274e0f", fontSize: "13px" }}
-                    >
-                      ✓ This appointment is confirmed. Doctor will see you on
-                      the scheduled date/time.
-                    </p>
-                  </Card>
-                )}
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <Tooltip title="View Details">
-                    <Button
-                      icon={<EyeOutlined />}
-                      type="default"
-                      block
-                      disabled={appointment.status === "cancelled"}
-                    />
-                  </Tooltip>
-                  {canCancel(appointment) && (
-                    <Button
-                      icon={<DeleteOutlined />}
-                      danger
-                      block
-                      loading={
-                        cancelingId === (appointment._id || appointment.id)
-                      }
-                      onClick={() =>
-                        handleCancelAppointment(
-                          appointment._id || appointment.id,
-                        )
-                      }
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ),
-          )}
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       )}
     </div>
