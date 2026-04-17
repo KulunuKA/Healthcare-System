@@ -7,9 +7,12 @@ import { Mail, Lock } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthProvider";
+import { useDoctor } from "@/context/DoctorProvider";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { loginDoctor } = useDoctor();
+  const [userType, setUserType] = useState("patient"); // "patient" or "doctor"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,11 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const response = await login(email, password);
+      if (userType === "patient") {
+        await login(email, password);
+      } else if (userType === "doctor") {
+        await loginDoctor({ email, password });
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || String(err);
       setError({ main: msg });
@@ -50,8 +57,38 @@ export default function LoginPage() {
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-bold">Welcome Back</h1>
           <p className="text-sm text-gray-500">
-            Sign in to access your health dashboard
+            Sign in to access your dashboard
           </p>
+        </div>
+
+        {/* User Type Toggle */}
+        <div className="w-full flex gap-2 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => {
+              setUserType("patient");
+              setError(null);
+            }}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+              userType === "patient"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Patient
+          </button>
+          <button
+            onClick={() => {
+              setUserType("doctor");
+              setError(null);
+            }}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+              userType === "doctor"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Doctor
+          </button>
         </div>
 
         {error && <div className="text-red-500 text-sm">{error.main}</div>}
@@ -85,7 +122,7 @@ export default function LoginPage() {
             </Link>
           </div>
           <Button type="button" onClick={handleLogin} loading={loading}>
-            Sign In
+            Sign In as {userType === "patient" ? "Patient" : "Doctor"}
           </Button>
         </div>
 
@@ -99,7 +136,7 @@ export default function LoginPage() {
         <p className="text-sm text-gray-400 mt-2">
           Don&apos;t have an account?{" "}
           <Link
-            href="/register/patient"
+            href={userType === "patient" ? "/register/patient" : "/register/doctor"}
             className="font-semibold"
             style={{ color: "var(--primary-blue)" }}
           >
