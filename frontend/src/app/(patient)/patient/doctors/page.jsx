@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   Button,
@@ -15,7 +15,6 @@ import {
 } from "antd";
 import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
-import Link from "next/link";
 
 const specialties = [
   "General Physician",
@@ -35,6 +34,7 @@ export default function DoctorsPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const router = useRouter();
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -194,13 +194,14 @@ export default function DoctorsPage() {
                 )}
               </div>
 
-              <Link
-                href={`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`}
+              <button
+                type="button"
+                onClick={() => router.push(`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`)}
+                className="ant-btn ant-btn-primary"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 4 }}
               >
-                <Button type="primary" block>
-                  Book Appointment
-                </Button>
-              </Link>
+                Book Appointment
+              </button>
             </Card>
           ))}
         </div>

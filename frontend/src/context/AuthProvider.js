@@ -17,7 +17,11 @@ export const AuthProvider = ({ children }) => {
     const user = getSessionValue("user");
 
     if (token || user) {
-      setUser(user);
+      try {
+        setUser(user ? JSON.parse(user) : null);
+      } catch (e) {
+        setUser(user);
+      }
       // if (user.role === "patient") {
       //   router.push("/patient");
       // }
