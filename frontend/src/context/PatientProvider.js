@@ -3,7 +3,7 @@ import {
   patientAPI,
 } from "@/services/patient.service";
 import { setSession, getSessionValue } from "@/utils/session";
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 
