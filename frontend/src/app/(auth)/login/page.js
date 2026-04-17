@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <div className="w-full h-screen flex">
       <SidePanel />
-      <div className="w-full h-full flex flex-col items-start gap-8 px-10 py-15 overflow-y-auto">
+      <div className="w-full h-full flex flex-col items-start gap-8 px-10 py-16 overflow-y-auto">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-bold">Welcome Back</h1>
           <p className="text-sm text-gray-500">

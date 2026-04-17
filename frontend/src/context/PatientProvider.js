@@ -40,7 +40,7 @@ export const PatientProvider = ({ children }) => {
     } catch (error) {
       console.error("Error registering patient:", error);
       throw (
-        error.response.data || error.message || "Failed to register patient"
+        error?.response?.data?.message || error?.message || "Failed to register patient"
       );
     }
   };

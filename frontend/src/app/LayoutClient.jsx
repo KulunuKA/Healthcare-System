@@ -13,11 +13,13 @@ export default function LayoutClient({ children }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {!hideNavbar.includes(pathname) && !isDoctorDashboard && !isAdminDashboard && <Navbar />}
+      {!isDoctorDashboard && !isAdminDashboard && <Navbar />}
 
       <main className="flex-1">{children}</main>
 
-      {!hideNavbar.includes(pathname) && !isDoctorDashboard && !isAdminDashboard && <Footer />}
+      {!hideNavbar.includes(pathname) &&
+        !isDoctorDashboard &&
+        !isAdminDashboard && <Footer />}
     </div>
   );
 }
