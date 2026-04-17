@@ -4,6 +4,18 @@ const API_BASE_URL = "/api/patients";
 const APPOINTMENT_API_BASE = "/api/appointments";
 const NOTIFICATION_API_BASE = "/api/notifications";
 
+// ─── Auth ────────────────────────────────────────────
+export function registerPatientAPI(patientData) {
+  return axiosInstance.post(`${API_BASE_URL}/auth/register`, patientData);
+}
+
+export function loginPatientAPI({ email, password }) {
+  return axiosInstance.post(`${API_BASE_URL}/auth/login`, {
+    email,
+    password,
+  });
+}
+
 // ─── Doctors ─────────────────────────────────────────
 export function getDoctorsBySpecialtyAPI(token, specialty) {
   return axiosInstance.get(`${APPOINTMENT_API_BASE}/doctors/search`, {
