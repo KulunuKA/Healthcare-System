@@ -13,8 +13,10 @@ const updateProfile = asyncHandler(async (req, res) => {
     offerTelemedicine: req.body?.offerTelemedicine,
     verified: req.body?.verified,
   });
-  return response.sendSuccess(res, { message: "profile updated", data: updated });
+  return response.sendSuccess(res, {
+    message: "profile updated",
+    data: updated,
+  });
 });
 
 module.exports = { getProfile, updateProfile };
-

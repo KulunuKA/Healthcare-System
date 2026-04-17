@@ -5,7 +5,7 @@ const DoctorSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
     fullName: { type: String, default: "" },
-    specialty: { type: String, default: "" , index: true},
+    specialty: { type: String, default: "", index: true },
     offerTelemedicine: { type: Boolean, default: false },
     role: { type: String, enum: ["doctor"], default: "doctor", index: true },
     verified: { type: Boolean, default: false, index: true },
@@ -16,8 +16,7 @@ const DoctorSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Doctor", DoctorSchema);
-

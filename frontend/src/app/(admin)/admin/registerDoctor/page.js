@@ -53,10 +53,19 @@ export default function AdminRegisterDoctorPage() {
 
     setLoading(true);
     try {
-      await registerDoctor({ email, password, fullName, specialty, offerTelemedicine });
+      await registerDoctor({
+        email,
+        password,
+        fullName,
+        specialty,
+        offerTelemedicine,
+      });
       message.success("Registration successful!");
     } catch (err) {
-      const msg = typeof err === 'string' ? err : (err?.message || err?.error || "Registration failed");
+      const msg =
+        typeof err === "string"
+          ? err
+          : err?.message || err?.error || "Registration failed";
       message.error(msg);
     } finally {
       setLoading(false);
@@ -66,7 +75,10 @@ export default function AdminRegisterDoctorPage() {
   return (
     <div className="mx-auto w-full max-w-2xl">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--dark-navy)" }}>
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: "var(--dark-navy)" }}
+        >
           Doctor Registration
         </h1>
         <p className="text-sm" style={{ color: "var(--text-gray)" }}>
@@ -101,7 +113,10 @@ export default function AdminRegisterDoctorPage() {
 
         <div className="flex flex-col gap-2">
           <label className="pl-1 text-xs font-semibold uppercase tracking-widest text-slate-500">
-            Specialty <span style={{ color: "var(--primary-blue)", marginLeft: "3px" }}>*</span>
+            Specialty{" "}
+            <span style={{ color: "var(--primary-blue)", marginLeft: "3px" }}>
+              *
+            </span>
           </label>
           <div className="relative">
             <span className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 transform items-center text-gray-500">
@@ -158,9 +173,16 @@ export default function AdminRegisterDoctorPage() {
             onChange={(e) => setOfferTelemedicine(e.target.checked)}
             className="w-4 h-4 rounded cursor-pointer"
           />
-          <label htmlFor="telemedicine" className="cursor-pointer flex flex-col gap-1">
-            <span className="font-semibold text-sm text-gray-900">Offer Remote Consultation</span>
-            <span className="text-xs text-gray-500">Offer remote consultation through the platform</span>
+          <label
+            htmlFor="telemedicine"
+            className="cursor-pointer flex flex-col gap-1"
+          >
+            <span className="font-semibold text-sm text-gray-900">
+              Offer Remote Consultation
+            </span>
+            <span className="text-xs text-gray-500">
+              Offer remote consultation through the platform
+            </span>
           </label>
         </div>
 
@@ -173,7 +195,11 @@ export default function AdminRegisterDoctorPage() {
 
       <p className="mt-6 text-sm text-gray-400">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold" style={{ color: "var(--primary-blue)" }}>
+        <Link
+          href="/login"
+          className="font-semibold"
+          style={{ color: "var(--primary-blue)" }}
+        >
           Sign in
         </Link>
       </p>

@@ -20,11 +20,11 @@ export default function DoctorManagementPage() {
     try {
       setLoading(true);
       const response = await listDoctorsAPI();
-      
-      const doctorsList = Array.isArray(response.data?.data) 
-        ? response.data.data 
+
+      const doctorsList = Array.isArray(response.data?.data)
+        ? response.data.data
         : [];
-      
+
       setDoctors(doctorsList);
       setFilteredDoctors(doctorsList);
     } catch (error) {
@@ -37,10 +37,11 @@ export default function DoctorManagementPage() {
 
   const handleSearch = (value) => {
     setSearchTerm(value);
-    const filtered = doctors.filter((doc) =>
-      doc.fullName?.toLowerCase().includes(value.toLowerCase()) ||
-      doc.specialty?.toLowerCase().includes(value.toLowerCase()) ||
-      doc.email?.toLowerCase().includes(value.toLowerCase())
+    const filtered = doctors.filter(
+      (doc) =>
+        doc.fullName?.toLowerCase().includes(value.toLowerCase()) ||
+        doc.specialty?.toLowerCase().includes(value.toLowerCase()) ||
+        doc.email?.toLowerCase().includes(value.toLowerCase()),
     );
     setFilteredDoctors(filtered);
   };
@@ -63,7 +64,10 @@ export default function DoctorManagementPage() {
     <div className="mx-auto w-full max-w-6xl">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: "var(--dark-navy)" }}>
+          <h1
+            className="text-2xl font-semibold tracking-tight"
+            style={{ color: "var(--dark-navy)" }}
+          >
             Doctor Management
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-gray)" }}>
@@ -79,8 +83,8 @@ export default function DoctorManagementPage() {
             style={{ borderRadius: "8px", borderColor: "var(--soft-blue)" }}
           />
           <Link href="/admin/registerDoctor">
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<PlusOutlined />}
               style={{ backgroundColor: "var(--primary-blue)" }}
             >
@@ -90,8 +94,14 @@ export default function DoctorManagementPage() {
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-sm" style={{ borderColor: "var(--soft-blue)" }}>
-        <div className="grid grid-cols-12 gap-3 border-b px-5 py-3 text-xs font-semibold uppercase tracking-wide" style={{ borderColor: "var(--soft-blue)", color: "var(--text-gray)" }}>
+      <div
+        className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-sm"
+        style={{ borderColor: "var(--soft-blue)" }}
+      >
+        <div
+          className="grid grid-cols-12 gap-3 border-b px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+          style={{ borderColor: "var(--soft-blue)", color: "var(--text-gray)" }}
+        >
           <div className="col-span-3">Full Name</div>
           <div className="col-span-2">Email</div>
           <div className="col-span-3">Specialty</div>
@@ -101,22 +111,42 @@ export default function DoctorManagementPage() {
 
         <div className="divide-y" style={{ borderColor: "var(--soft-blue)" }}>
           {filteredDoctors.length === 0 ? (
-            <div className="px-5 py-8 text-center" style={{ color: "var(--text-gray)" }}>
-              {doctors.length === 0 ? "No doctors found" : "No doctors match your search"}
+            <div
+              className="px-5 py-8 text-center"
+              style={{ color: "var(--text-gray)" }}
+            >
+              {doctors.length === 0
+                ? "No doctors found"
+                : "No doctors match your search"}
             </div>
           ) : (
             filteredDoctors.map((doctor) => (
-              <div key={doctor.id || doctor._id} className="grid grid-cols-12 gap-3 px-5 py-4 text-sm">
-                <div className="col-span-3 font-medium" style={{ color: "var(--dark-navy)" }}>
+              <div
+                key={doctor.id || doctor._id}
+                className="grid grid-cols-12 gap-3 px-5 py-4 text-sm"
+              >
+                <div
+                  className="col-span-3 font-medium"
+                  style={{ color: "var(--dark-navy)" }}
+                >
                   {doctor.fullName || "—"}
                 </div>
-                <div className="col-span-2 truncate" style={{ color: "var(--text-gray)" }}>
+                <div
+                  className="col-span-2 truncate"
+                  style={{ color: "var(--text-gray)" }}
+                >
                   {doctor.email}
                 </div>
-                <div className="col-span-3" style={{ color: "var(--text-gray)" }}>
+                <div
+                  className="col-span-3"
+                  style={{ color: "var(--text-gray)" }}
+                >
                   {doctor.specialty || "—"}
                 </div>
-                <div className="col-span-2" style={{ color: "var(--text-gray)" }}>
+                <div
+                  className="col-span-2"
+                  style={{ color: "var(--text-gray)" }}
+                >
                   {doctor.offerTelemedicine ? "✓ Yes" : "✗ No"}
                 </div>
                 <div className="col-span-2 text-right">
@@ -124,7 +154,10 @@ export default function DoctorManagementPage() {
                     className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
                     style={{
                       borderColor: "var(--soft-blue)",
-                      color: getStatusBadge(doctor) === "Approved" ? "var(--primary-blue)" : "var(--text-gray)",
+                      color:
+                        getStatusBadge(doctor) === "Approved"
+                          ? "var(--primary-blue)"
+                          : "var(--text-gray)",
                       backgroundColor: "rgba(238,247,255,0.7)",
                     }}
                   >
@@ -139,4 +172,3 @@ export default function DoctorManagementPage() {
     </div>
   );
 }
-

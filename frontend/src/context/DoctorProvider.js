@@ -48,10 +48,8 @@ export const DoctorProvider = ({ children }) => {
       }
       return response.data;
     } catch (error) {
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
-        "Registration failed";
+      const errorMessage =
+        error.response?.data?.message || error.message || "Registration failed";
       throw errorMessage;
     }
   };
@@ -76,10 +74,8 @@ export const DoctorProvider = ({ children }) => {
       }
       return response.data;
     } catch (error) {
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
-        "Login failed";
+      const errorMessage =
+        error.response?.data?.message || error.message || "Login failed";
       throw errorMessage;
     }
   };
