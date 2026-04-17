@@ -54,7 +54,7 @@ export function subscribeToAppointmentUpdatesAPI(token, appointmentId) {
 }
 
 export const patientAPI = {
-  register: () => {
+  register: (patientData) => {
     return axiosInstance.post(`${API_BASE_URL}/auth/register`, patientData);
   },
 
