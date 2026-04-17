@@ -78,10 +78,8 @@ const webhookPayment = asyncHandler(async (req, res) => {
     payment.status = "succeeded";
     console.log(`Payment ${order_id} marked as SUCCEEDED`);
     
-    // SAVE NOW so the DB reflects success even if services are down
     await payment.save();
 
-    // Try to notify other services
     try {
       await axios.patch(
         `${config.APPOINTMENT_SERVICE_URL}/internal/appointments/${payment.appointmentId}/confirm`,

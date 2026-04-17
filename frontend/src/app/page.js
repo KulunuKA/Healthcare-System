@@ -1,4 +1,4 @@
-"use client"; // REQUIRED because the button has click events
+"use client"; 
 
 import Link from "next/link";
 import { PayButton } from "../features/payment/components/PayButton";
@@ -32,7 +32,6 @@ const services = [
 ];
 
 export default function HomePage() {
-  // Mock data to test the integration
   const mockAppointment = {
     id: "65f1a2b3c4d5e6f7a8b9c0d1",
     amount: 1500,
@@ -66,7 +65,6 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* --- SERVICES SECTION --- */}
         <h2 className="text-2xl font-semibold mb-6">Our Services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
