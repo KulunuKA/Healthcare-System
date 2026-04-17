@@ -71,12 +71,16 @@ export const PatientProvider = ({ children }) => {
       const token = getToken();
       const response = await getDoctorsBySpecialtyAPI(token, specialty);
       console.log("Doctors response:", response);
-      
+
       // Handle both response structures: array directly or nested in { doctors } object
       let doctorsList = response.data?.data;
       console.log("Doctors data extracted:", doctorsList);
-      
-      if (doctorsList && typeof doctorsList === 'object' && !Array.isArray(doctorsList)) {
+
+      if (
+        doctorsList &&
+        typeof doctorsList === "object" &&
+        !Array.isArray(doctorsList)
+      ) {
         // If it's an object with a doctors property, extract the array
         doctorsList = doctorsList.doctors || [];
         console.log("Extracted from nested object:", doctorsList);
@@ -101,29 +105,35 @@ export const PatientProvider = ({ children }) => {
       const token = getToken();
       const response = await getPatientAppointmentsAPI(token);
       console.log("Appointments response:", response);
-      
+
       // Handle both response structures: array directly or nested in { appointments } object
       let appointmentsList = response.data?.data;
       console.log("Appointments data extracted:", appointmentsList);
-      
-      if (appointmentsList && typeof appointmentsList === 'object' && !Array.isArray(appointmentsList)) {
+
+      if (
+        appointmentsList &&
+        typeof appointmentsList === "object" &&
+        !Array.isArray(appointmentsList)
+      ) {
         // If it's an object with an appointments property, extract the array
         appointmentsList = appointmentsList.appointments || [];
         console.log("Extracted from nested object:", appointmentsList);
       }
-      appointmentsList = Array.isArray(appointmentsList) ? appointmentsList : [];
+      appointmentsList = Array.isArray(appointmentsList)
+        ? appointmentsList
+        : [];
       console.log("Final appointments list:", appointmentsList);
-      
+
       // Log each appointment to see doctor data
-      appointmentsList.forEach(appt => {
+      appointmentsList.forEach((appt) => {
         console.log(`Appointment ${appt.id}:`, {
           doctorId: appt.doctorId,
           doctor: appt.doctor,
           reason: appt.reason,
-          notes: appt.notes
+          notes: appt.notes,
         });
       });
-      
+
       setAppointments(appointmentsList);
       return appointmentsList;
     } catch (error) {
