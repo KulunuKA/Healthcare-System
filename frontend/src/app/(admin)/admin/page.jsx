@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TelemedicineManagementSection from "@/components/admin/TelemedicineManagementSection";
 
 const cards = [
   {
@@ -66,6 +67,8 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       </div>
+
+      <TelemedicineManagementSection />
     </div>
   );
 }

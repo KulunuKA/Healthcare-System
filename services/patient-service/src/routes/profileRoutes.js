@@ -1,10 +1,12 @@
 const express = require("express");
-const { requireAuth } = require("../middlewares/authJwt");
 const { getProfile, updateProfile } = require("../controllers/profileController");
 const router = express.Router();
 
-router.get("/profile", requireAuth, getProfile);
-router.put("/profile", requireAuth, updateProfile);
+// GET /me -> fetch profile
+router.get("/", getProfile);
+
+// PUT /me -> update profile
+router.put("/", updateProfile);
 
 module.exports = router;
 

@@ -17,7 +17,9 @@ export default function LayoutClient({ children }) {
 
       <main className="flex-1">{children}</main>
 
-      {!hideNavbar.includes(pathname) && !isDoctorDashboard && !isAdminDashboard && <Footer />}
+      {!hideNavbar.includes(pathname) &&
+        !isDoctorDashboard &&
+        !isAdminDashboard && <Footer />}
     </div>
   );
 }

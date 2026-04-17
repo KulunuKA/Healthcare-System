@@ -47,7 +47,7 @@ async function login({ email, password }) {
 
   const token = signToken({ userId: patient._id, role: patient.role, email: patient.email });
   return {
-    patient: { id: patient._id, email: patient.email, role: patient.role, profile: patient.profile },
+    user: { id: patient._id, email: patient.email, role: patient.role, profile: patient.profile },
     token,
   };
 }

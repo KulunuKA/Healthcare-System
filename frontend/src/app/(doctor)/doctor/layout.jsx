@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   Calendar,
+  Video,
   Clock,
   FileText,
   UserCircle,
@@ -28,6 +29,11 @@ const NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    label: "Telemedicine sessions",
+    href: "/doctor/telemedicine",
+    icon: Video,
+  },
+  {
     label: "Availability",
     href: "/doctor/availability",
     icon: Clock,
@@ -47,6 +53,7 @@ const NAV_ITEMS = [
 const PAGE_TITLES = {
   "/doctor/dashboard": "Dashboard",
   "/doctor/appointments": "Appointments",
+  "/doctor/telemedicine": "Telemedicine sessions",
   "/doctor/availability": "Availability",
   "/doctor/prescriptions": "Prescriptions",
   "/doctor/profile": "My Profile",

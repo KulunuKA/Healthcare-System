@@ -1,0 +1,565 @@
+/* Telemedicine request cards — case-file / registry panel (split rail + detail sheet) */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fafbfc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+    0 24px 48px -28px rgba(15, 23, 42, 0.35),
+    0 2px 8px -4px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(180deg, black 0%, transparent 78%);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 32px 64px -24px rgba(15, 23, 42, 0.38),
+    0 4px 16px -6px rgba(79, 70, 229, 0.12);
+}
+
+/* Left rail — status-coded, like a spine label on a chart */
+.rail {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 18px 10px;
+  gap: 10px;
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
+  color: #e2e8f0;
+  text-align: center;
+}
+
+.rail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 0%,
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+.railGlyph {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.railCode {
+  position: relative;
+  z-index: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.55);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: 120px;
+  line-height: 1.4;
+}
+
+.railDot {
+  position: relative;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.card[data-status="pending"] .railDot {
+  background: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+}
+.card[data-status="accepted"] .railDot {
+  background: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.22);
+}
+.card[data-status="rejected"] .railDot {
+  background: #fb7185;
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.22);
+}
+.card[data-status="cancelled"] .railDot {
+  background: #94a3b8;
+}
+.card[data-status="completed"] .railDot {
+  background: #22d3ee;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+/* Main body */
+.body {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px 14px 20px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 252, 0.98) 0%,
+    rgba(255, 255, 255, 0.92) 50%,
+    rgba(241, 245, 249, 0.5) 100%
+  );
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 0 0 6px 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.subtitle {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.pillType {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4338ca;
+  border-color: rgba(79, 70, 229, 0.22);
+}
+
+.pillStatus {
+  background: rgba(15, 23, 42, 0.05);
+  color: #475569;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.pillPaid {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.pillUnpaid {
+  background: rgba(245, 158, 11, 0.14);
+  color: #9a3412;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.cardInner {
+  padding: 0 18px 18px 20px;
+}
+
+.detailBlock {
+  margin-top: 14px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.detailInset {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
+    linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(88px, 118px) 1fr;
+  gap: 8px 16px;
+  align-items: start;
+}
+
+.detailLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding-top: 3px;
+}
+
+.detailValue {
+  font-size: 13px;
+  color: #1e293b;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.detailValueMuted {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.scheduleHighlight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.scheduleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.waitingBanner {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 12px;
+  color: #92400e;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+}
+
+.refId {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.meetBtn {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+  padding-inline: 18px !important;
+  background: linear-gradient(135deg, #312e81 0%, #4f46e5 55%, #6366f1 100%) !important;
+  border: none !important;
+  box-shadow: 0 10px 22px -10px rgba(49, 46, 129, 0.55) !important;
+}
+
+.meetBtn:hover {
+  filter: brightness(1.06);
+}
+
+.linkHint {
+  font-size: 12px;
+  color: #94a3b8;
+  max-width: 300px;
+  line-height: 1.45;
+}
+
+/* Compact patient-only variant — smaller footprint, doctor cards unchanged */
+.cardPatient {
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+    0 14px 32px -22px rgba(15, 23, 42, 0.28),
+    0 1px 6px -3px rgba(15, 23, 42, 0.05);
+}
+
+.cardPatient::after {
+  background-size: 18px 18px;
+  opacity: 0.35;
+}
+
+.cardPatient:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 18px 40px -20px rgba(15, 23, 42, 0.32),
+    0 2px 10px -4px rgba(79, 70, 229, 0.08);
+}
+
+.cardPatient .rail {
+  flex: 0 0 48px;
+  padding: 10px 5px;
+  gap: 6px;
+}
+
+.cardPatient .railGlyph {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.cardPatient .railCode {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  max-height: 56px;
+}
+
+.cardPatient .railDot {
+  width: 6px;
+  height: 6px;
+}
+
+.cardPatient .hero {
+  padding: 10px 12px 8px 14px;
+  gap: 10px;
+}
+
+.cardPatient .eyebrow {
+  font-size: 9px;
+  margin: 0 0 3px 0;
+}
+
+.cardPatient .title {
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+.cardPatient .subtitle {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.cardPatient .pill {
+  padding: 2px 7px;
+  font-size: 9px;
+  gap: 4px;
+}
+
+.cardPatient .cardInner {
+  padding: 0 12px 12px 14px;
+}
+
+.cardPatient .detailBlock {
+  margin-top: 6px;
+}
+
+.cardPatient .detailInset {
+  margin-top: 6px;
+  padding: 9px 11px;
+  border-radius: 10px;
+}
+
+.cardPatient .detailGrid {
+  grid-template-columns: minmax(68px, 92px) 1fr;
+  gap: 5px 10px;
+}
+
+.cardPatient .detailLabel {
+  font-size: 8px;
+  padding-top: 1px;
+}
+
+.cardPatient .detailValue,
+.cardPatient .detailValueMuted {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.cardPatient .scheduleHighlight {
+  gap: 8px 10px;
+}
+
+.cardPatient .scheduleChip {
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  gap: 5px;
+}
+
+.cardPatient .waitingBanner {
+  padding: 7px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.cardPatient .foot {
+  margin-top: 10px;
+  padding: 7px 9px;
+  border-radius: 9px;
+  gap: 8px;
+}
+
+.cardPatient .refId {
+  font-size: 10px;
+}
+
+.cardPatient .meetBtn {
+  height: 34px !important;
+  padding-inline: 14px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+}
+
+.cardPatient .payBtn {
+  height: 34px !important;
+  padding-inline: 14px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px -8px rgba(180, 83, 9, 0.55) !important;
+}
+
+.cardPatient .payBtn:hover {
+  color: #fff !important;
+  filter: brightness(1.06);
+}
+
+.cardPatient .linkHint {
+  font-size: 11px;
+  max-width: 260px;
+}
+
+/* Doctor variant: rail + two-column sheet */
+.cardDoctorInner {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.doctorSheet {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 16px 18px 18px 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.doctorMain {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.doctorActions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 164px;
+}
+
+.actionPrimary {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  height: 42px !important;
+  background: linear-gradient(135deg, #312e81 0%, #4f46e5 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 18px -8px rgba(49, 46, 129, 0.5) !important;
+}
+
+.actionDanger {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+}
+
+.copyLink {
+  font-size: 11px !important;
+  word-break: break-all;
+  line-height: 1.45 !important;
+}

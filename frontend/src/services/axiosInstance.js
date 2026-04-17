@@ -1,4 +1,4 @@
-import { removeSession } from "@/utils/session";
+import { getSessionValue, removeSession } from "@/utils/session";
 import axios from "axios";
 import { message } from "antd";
 
@@ -17,7 +17,17 @@ const axiosInstance = axios.create({
   },
 });
 
+const getAccessToken = () => {
+  return getSessionValue("accessToken");
+};
+
 const requestHandler = (request) => {
+  if (request.headers && !request.headers["Authorization"]) {
+    const token = getAccessToken();
+    if (token) {
+      request.headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
   return request;
 };
 
@@ -49,15 +59,6 @@ const errorHandler = async (error) => {
       "Cannot connect to server. Please check your internet connection.",
     );
   } else if (error.response) {
-    // Server responded with error status
-    console.error("❌ API Error Response:", {
-      status: error.response.status,
-      statusText: error.response.statusText,
-      url: originalConfig?.url,
-      data: error.response.data,
-      message: error.response?.data?.message,
-    });
-
     // Handle session expired (401) errors
     if (
       error.response.status === 401 &&
@@ -79,9 +80,9 @@ const errorHandler = async (error) => {
 
       // Clear preferences FIRST before redirecting
       try {
-        await removeSession("accessToken");
-        await removeSession("user");
-        await removeSession("userProfile");
+        // await removeSession("accessToken");
+        // await removeSession("user");
+        // await removeSession("userProfile");
         console.log("✅ Preferences cleared successfully");
       } catch (clearError) {
         console.error("❌ Error clearing preferences:", clearError);
@@ -89,7 +90,7 @@ const errorHandler = async (error) => {
 
       // Redirect to login page
       setTimeout(() => {
-        window.location.href = "/login";
+        // window.location.href = "/login";
       }, 1000);
 
       // Reset refreshFlag after a delay to allow future 401 handling
