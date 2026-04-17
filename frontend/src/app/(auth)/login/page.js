@@ -136,7 +136,9 @@ export default function LoginPage() {
         <p className="text-sm text-gray-400 mt-2">
           Don&apos;t have an account?{" "}
           <Link
-            href={userType === "patient" ? "/register/patient" : "/register/doctor"}
+            href={
+              userType === "patient" ? "/register/patient" : "/register/doctor"
+            }
             className="font-semibold"
             style={{ color: "var(--primary-blue)" }}
           >

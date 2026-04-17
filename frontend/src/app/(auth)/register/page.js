@@ -12,9 +12,7 @@ export default function RegisterChoicePage() {
       <div className="w-full h-full flex flex-col items-center justify-center gap-8 px-10 py-16">
         <div className="text-center flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Create Your Account</h1>
-          <p className="text-gray-500">
-            Choose your role to get started
-          </p>
+          <p className="text-gray-500">Choose your role to get started</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
