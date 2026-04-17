@@ -2,6 +2,7 @@ import axiosInstance from "./axiosInstance";
 
 const API_BASE_URL = "/api/patients";
 const APPOINTMENT_API_BASE = "/api/appointments";
+const NOTIFICATION_API_BASE = "/api/notifications";
 
 // ─── Doctors ─────────────────────────────────────────
 export function getDoctorsBySpecialtyAPI(token, specialty) {
@@ -74,5 +75,8 @@ export const patientAPI = {
   },
   changePassword: (passwordData) => {
     return axiosInstance.put(`${API_BASE_URL}/me/password`, passwordData);
+  },
+  getNotifications: () => {
+    return axiosInstance.get(`${NOTIFICATION_API_BASE}/notifications`);
   },
 };

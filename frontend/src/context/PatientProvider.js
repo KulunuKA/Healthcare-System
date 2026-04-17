@@ -19,8 +19,7 @@ export const PatientProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const getToken = () => getSessionValue("accessToken");
+  const [notifications, setNotifications] = useState([]);
 
   // ─── Auth ────────────────────────────────────────
   const registerPatient = async (patientData) => {
@@ -75,6 +74,18 @@ export const PatientProvider = ({ children }) => {
     }
   };
 
+  const getNotifications = async () => {
+    const t = getSessionValue("accessToken");
+    if (!t) throw new Error("missing token");
+    try {
+      const res = await patientAPI.getNotifications();
+      if (res?.data?.success) setNotifications(res.data.notifications || []);
+      return res;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <PatientContext.Provider
       value={{
@@ -87,8 +98,10 @@ export const PatientProvider = ({ children }) => {
         setProfile,
         loading,
         saving,
+        notifications,
         getPatientProfile,
         updatePatientProfile,
+        getNotifications
       }}
     >
       {children}
