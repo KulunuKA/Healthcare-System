@@ -1,3 +1,4 @@
+'use client';
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import {
@@ -8,11 +9,7 @@ import {
   Stethoscope,
   UserRound,
 } from "lucide-react";
-
-export const metadata = {
-  title: "Doctors | Smart Healthcare Platform",
-  description: "Browse doctors by specialty and book appointments easily.",
-};
+import { useRouter } from "next/navigation";
 
 const specialties = [
   { name: "General Physician", Icon: Stethoscope },
@@ -24,6 +21,7 @@ const specialties = [
 ];
 
 export default function DoctorsPage() {
+  const router = useRouter();
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 text-[#2f2d6b]">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
@@ -58,10 +56,10 @@ export default function DoctorsPage() {
         </div>
 
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button href="/login">
+          <Button onClick={() => router.push("/login")}>
             Sign in to book an appointment
           </Button>
-          <Button href="/contact" variant="outline">
+          <Button onClick={() => router.push("/contact")} variant="outline">
             Contact support
           </Button>
         </div>

@@ -1,12 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-
-export const metadata = {
-  title: "About | Smart Healthcare Platform",
-  description: "Learn about the Smart Healthcare Platform.",
-};
+import { useRouter } from "next/navigation";
 
 export default function AboutPage() {
+  const router = useRouter();
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 text-[#2f2d6b]">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
@@ -45,10 +44,8 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button href="/doctors">
-            Find doctors
-          </Button>
-          <Button href="/contact" variant="outline">
+          <Button onClick={() => router.push("/findDoctors")}>Find doctors</Button>
+          <Button onClick={() => router.push("/contact")} variant="outline">
             Contact us
           </Button>
         </div>

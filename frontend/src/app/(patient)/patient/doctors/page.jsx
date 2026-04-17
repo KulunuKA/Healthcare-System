@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   Button,
@@ -37,6 +37,7 @@ export default function DoctorsPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const router = useRouter();
   const [error, setError] = useState(null);
 
   useEffect(() => {
