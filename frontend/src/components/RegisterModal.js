@@ -23,7 +23,7 @@ export default function RegisterModal({ isOpen, onClose }) {
       label: "Doctor",
       sub: "Manage patients & consultations",
       src: "/images/doctor.jpeg",
-      route: "/register/doctor",
+      route: "/admin/registerDoctor",
       accent: "#0EA5E9",
       bg: "#F0F9FF",
       badge: "Professional",

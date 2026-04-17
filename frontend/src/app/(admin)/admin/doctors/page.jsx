@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const rows = [
   { id: "D-2101", name: "Dr. Amila Fernando", specialty: "Cardiology", status: "Approved" },
   { id: "D-2102", name: "Dr. Sachini Gunasekara", specialty: "Dermatology", status: "Pending" },
@@ -27,13 +29,13 @@ export default function DoctorManagementPage() {
             style={{ borderColor: "var(--soft-blue)" }}
             placeholder="Search doctors…"
           />
-          <button
-            className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          <Link
+            href="/admin/registerDoctor"
+            className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
             style={{ backgroundColor: "var(--primary-blue)" }}
-            type="button"
           >
-            Invite
-          </button>
+            Add a doctor
+          </Link>
         </div>
       </div>
 
