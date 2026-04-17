@@ -55,7 +55,7 @@ export default function DoctorManagementPage() {
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <Spin size="large" tip="Loading doctors..." />
+        <Spin size="large" description="Loading doctors..." />
       </div>
     );
   }

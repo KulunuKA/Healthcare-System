@@ -45,7 +45,7 @@ export default function NewAppointmentPage() {
   if (loadingDoctor) {
     return (
       <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <Spin size="large" tip="Loading..." />
+        <Spin size="large" description="Loading..." />
       </div>
     );
   }

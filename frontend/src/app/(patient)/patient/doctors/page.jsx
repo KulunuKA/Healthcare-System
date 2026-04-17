@@ -113,7 +113,7 @@ export default function DoctorsPage() {
         <Empty description="Select a specialty to view available doctors" />
       ) : loadingDoctors ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
-          <Spin size="large" tip="Loading doctors..." />
+          <Spin size="large" description="Loading doctors..." />
         </div>
       ) : filteredDoctors.length === 0 ? (
         <Empty description="No doctors found in this specialty" />

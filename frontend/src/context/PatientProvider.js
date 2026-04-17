@@ -14,6 +14,13 @@ import { useAuth } from "./AuthProvider";
 
 const PatientContext = createContext();
 
+/** Appointment service returns `{ doctors: [...] }`; some paths may return a bare array. */
+function normalizeDoctorList(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.doctors)) return payload.doctors;
+  return [];
+}
+
 export const PatientProvider = ({ children }) => {
   const router = useRouter();
   const { setUser } = useAuth();
@@ -68,9 +75,11 @@ export const PatientProvider = ({ children }) => {
   const fetchDoctorsBySpecialty = useCallback(async (specialty) => {
     setLoadingDoctors(true);
     try {
-      const response = await getDoctorsBySpecialtyAPI(specialty);
-      setDoctors(response.data.data || []);
-      return response.data.data || [];
+      const token = getToken();
+      const response = await getDoctorsBySpecialtyAPI(token, specialty);
+      const list = normalizeDoctorList(response.data?.data);
+      setDoctors(list);
+      return list;
     } catch (error) {
       console.error("Error fetching doctors:", error);
       throw error;

@@ -240,7 +240,7 @@ export default function DoctorAppointmentsPage() {
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <Spin size="large" tip="Loading appointments..." />
+        <Spin size="large" description="Loading appointments..." />
       </div>
     );
   }
