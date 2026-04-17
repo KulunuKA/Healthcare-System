@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card, Button, Select, Input, Spin, Empty, Badge, Tag } from "antd";
+import {
+  Card,
+  Button,
+  Select,
+  Input,
+  Spin,
+  Empty,
+  Badge,
+  Tag,
+  message,
+} from "antd";
 import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
 import Link from "next/link";
@@ -25,6 +35,7 @@ export default function DoctorsPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fromUrl = searchParams.get("specialty");
@@ -41,40 +52,36 @@ export default function DoctorsPage() {
 
   const loadDoctors = async () => {
     try {
+      setError(null);
       await fetchDoctorsBySpecialty(selectedSpecialty);
     } catch (error) {
       console.error("Error loading doctors:", error);
+      setError("Failed to load doctors. Please try again.");
+      message.error("Failed to load doctors");
     }
   };
 
+  // FIXED: Updated to use 'name' to match your MongoDB Compass screenshot
   useEffect(() => {
-    const filtered = doctors.filter(
-      (doctor) =>
-        doctor.fullName?.toLowerCase().includes(searchText.toLowerCase()) ||
-        doctor.email?.toLowerCase().includes(searchText.toLowerCase()),
-    );
+    const doctorList = Array.isArray(doctors) ? doctors : [];
+    const filtered = doctorList.filter((doctor) => {
+      const nameMatch = (doctor.name || "").toLowerCase().includes(searchText.toLowerCase());
+      const emailMatch = (doctor.email || "").toLowerCase().includes(searchText.toLowerCase());
+      return nameMatch || emailMatch;
+    });
     setFilteredDoctors(filtered);
   }, [doctors, searchText]);
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1
-        style={{ marginBottom: "30px", fontSize: "32px", fontWeight: "bold" }}
-      >
+      <h1 style={{ marginBottom: "30px", fontSize: "32px", fontWeight: "bold" }}>
         <TeamOutlined style={{ marginRight: "10px" }} />
         Find a Doctor
       </h1>
 
-      {/* Specialty Filter */}
       <Card style={{ marginBottom: "20px" }}>
         <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "10px",
-              fontWeight: "600",
-            }}
-          >
+          <label style={{ display: "block", marginBottom: "10px", fontWeight: "600" }}>
             Select Specialty
           </label>
           <Select
@@ -88,13 +95,7 @@ export default function DoctorsPage() {
 
         {selectedSpecialty && (
           <>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "10px",
-                fontWeight: "600",
-              }}
-            >
+            <label style={{ display: "block", marginBottom: "10px", fontWeight: "600" }}>
               Search Doctor
             </label>
             <Input
@@ -108,9 +109,10 @@ export default function DoctorsPage() {
         )}
       </Card>
 
-      {/* Doctors Grid */}
       {!selectedSpecialty ? (
         <Empty description="Select a specialty to view available doctors" />
+      ) : error ? (
+        <Empty description={error} />
       ) : loadingDoctors ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
           <Spin size="large" tip="Loading doctors..." />
@@ -129,21 +131,12 @@ export default function DoctorsPage() {
             <Card
               key={doctor._id || doctor.id}
               hoverable
-              style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
+              style={{ height: "100%", display: "flex", flexDirection: "column" }}
             >
               <div style={{ marginBottom: "15px" }}>
-                <h3
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    margin: "0 0 10px 0",
-                  }}
-                >
-                  {doctor.fullName || "Dr. N/A"}
+                <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: "0 0 10px 0" }}>
+                  {/* FIXED: Changed fullName to name */}
+                  {doctor.name || "Dr. Anonymous"}
                 </h3>
                 <Tag color="blue">{doctor.specialty}</Tag>
                 {doctor.verified && (
@@ -155,16 +148,15 @@ export default function DoctorsPage() {
 
               <div style={{ marginBottom: "15px", flex: 1 }}>
                 <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
-                  <strong>Email:</strong> {doctor.email}
+                  <strong>Email:</strong> {doctor.email || "N/A"}
                 </p>
                 {doctor.experience && (
-                  <p
-                    style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}
-                  >
+                  <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
                     <strong>Experience:</strong> {doctor.experience} years
                   </p>
                 )}
-                {doctor.consultationFee && (
+                {/* FIXED: Added fallback for fee field */}
+                {(doctor.consultationFee || doctor.fee) && (
                   <p
                     style={{
                       margin: "5px 0",
@@ -173,14 +165,12 @@ export default function DoctorsPage() {
                       fontWeight: "600",
                     }}
                   >
-                    Consultation: ${doctor.consultationFee}
+                    Consultation: LKR {doctor.consultationFee || doctor.fee}
                   </p>
                 )}
               </div>
 
-              <Link
-                href={`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`}
-              >
+              <Link href={`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`}>
                 <Button type="primary" block>
                   Book Appointment
                 </Button>

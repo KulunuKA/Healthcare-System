@@ -2,6 +2,7 @@ import axiosInstance from "./axiosInstance";
 
 const API_BASE_URL = "/api/patients";
 const APPOINTMENT_API_BASE = "/api/appointments";
+const NOTIFICATION_API_BASE = "/api/notifications";
 
 // ─── Auth ────────────────────────────────────────────
 export function registerPatientAPI(patientData) {
@@ -9,7 +10,10 @@ export function registerPatientAPI(patientData) {
 }
 
 export function loginPatientAPI({ email, password }) {
-  return axiosInstance.post(`${API_BASE_URL}/auth/login`, { email, password });
+  return axiosInstance.post(`${API_BASE_URL}/auth/login`, {
+    email,
+    password,
+  });
 }
 
 // ─── Doctors ─────────────────────────────────────────
@@ -60,3 +64,36 @@ export function cancelAppointmentAPI(token, appointmentId) {
 export function subscribeToAppointmentUpdatesAPI(token, appointmentId) {
   return `${axiosInstance.defaults.baseURL}${APPOINTMENT_API_BASE}/appointments/${appointmentId}/status/stream?token=${token}`;
 }
+
+export const patientAPI = {
+  register: (patientData) => {
+    return axiosInstance.post(`${API_BASE_URL}/auth/register`, patientData);
+  },
+
+  login: (email, password) => {
+    return axiosInstance.post(`${API_BASE_URL}/auth/login`, {
+      email,
+      password,
+    });
+  },
+
+  // ─── Profile ─────────────────────────────────────────
+  getProfile: () => {
+    return axiosInstance.get(`${API_BASE_URL}/me`);
+  },
+
+  updateProfile: (profileData) => {
+    return axiosInstance.put(`${API_BASE_URL}/me`, profileData);
+  },
+  changePassword: (passwordData) => {
+    return axiosInstance.put(`${API_BASE_URL}/me/password`, passwordData);
+  },
+  getNotifications: () => {
+    return axiosInstance.get(`${NOTIFICATION_API_BASE}/notifications`);
+  },
+  markNotificationRead: (id) => {
+    return axiosInstance.put(
+      `${NOTIFICATION_API_BASE}/notifications/${id}/read`,
+    );
+  },
+};

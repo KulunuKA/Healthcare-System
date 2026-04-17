@@ -75,7 +75,7 @@ export default function AppointmentBookingForm({
 
       {loading ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
-          <Spin size="large" tip="Booking appointment..." />
+          <Spin size="large" description="Booking appointment..." />
         </div>
       ) : (
         <Form

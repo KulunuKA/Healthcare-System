@@ -6,54 +6,38 @@ import { Button, Input } from "@/components/ui";
 import { Mail, Lock } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
-import { useDoctor } from "@/context/DoctorProvider";
 import { useAuth } from "@/context/AuthProvider";
-import { setSession } from "@/utils/session";
-import axiosInstance from "@/services/axiosInstance";
-import { message } from "antd";
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("patient");
   const [loading, setLoading] = useState(false);
-  const { loginDoctor } = useDoctor();
   const { setUser } = useAuth();
+  const [error, setError] = useState(null);
+
+  const validateInputs = () => {
+    let newError = {};
+    if (!email) {
+      newError.email = "Email is required";
+    }
+    if (!password) {
+      newError.password = "Password is required";
+    }
+
+    setError(newError);
+    return Object.keys(newError).length === 0;
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      message.warning("Please enter email and password");
-      return;
-    }
+    if (!validateInputs()) return;
 
     setLoading(true);
     try {
-      if (role === "doctor") {
-        await loginDoctor({ email, password });
-        message.success("Welcome back, Doctor!");
-      } else {
-        // Patient login
-        const response = await axiosInstance.post("/api/patients/auth/login", {
-          email,
-          password,
-        });
-        const result = response.data.data;
-        await setSession("accessToken", result.token);
-        const userObj = {
-          id: result.patient?.id || result.patient?._id,
-          email: result.patient?.email,
-          fullName: result.patient?.fullName,
-          role: "patient",
-        };
-        await setSession("user", JSON.stringify(userObj));
-        setUser(userObj);
-        message.success("Welcome back!");
-        window.location.href = "/patient";
-      }
+      const response = await login(email, password);
     } catch (err) {
-      const msg =
-        err?.message || err?.error || "Login failed. Please try again.";
-      message.error(msg);
+      const msg = err?.response?.data?.message || err?.message || String(err);
+      setError({ main: msg });
     } finally {
       setLoading(false);
     }
@@ -62,7 +46,7 @@ export default function LoginPage() {
   return (
     <div className="w-full h-screen flex">
       <SidePanel />
-      <div className="w-full h-full flex flex-col items-start gap-8 px-10 py-15 overflow-y-auto">
+      <div className="w-full h-full flex flex-col items-start gap-8 px-10 py-16 overflow-y-auto">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-bold">Welcome Back</h1>
           <p className="text-sm text-gray-500">
@@ -70,40 +54,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Role Toggle */}
-        <div
-          style={{
-            display: "flex",
-            borderRadius: "12px",
-            overflow: "hidden",
-            border: "2px solid #e8edf5",
-            width: "100%",
-            maxWidth: "360px",
-          }}
-        >
-          {["patient", "doctor"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              style={{
-                flex: 1,
-                padding: "10px 0",
-                fontSize: "14px",
-                fontWeight: 600,
-                border: "none",
-                cursor: "pointer",
-                background:
-                  role === r ? "var(--primary-blue)" : "transparent",
-                color: role === r ? "#fff" : "var(--text-gray)",
-                transition: "all 0.2s ease",
-                letterSpacing: "0.3px",
-                textTransform: "capitalize",
-              }}
-            >
-              {r === "patient" ? "🧑 Patient" : "🩺 Doctor"}
-            </button>
-          ))}
-        </div>
+        {error && <div className="text-red-500 text-sm">{error.main}</div>}
 
         <div className="w-full flex flex-col gap-4">
           <Input
@@ -113,6 +64,7 @@ export default function LoginPage() {
             onChange={setEmail}
             icon={Mail}
             label="Email"
+            error={error?.email}
           />
           <Input
             type="password"
@@ -121,6 +73,7 @@ export default function LoginPage() {
             onChange={setPassword}
             icon={Lock}
             label="Password"
+            error={error?.password}
           />
 
           <div className="flex flex-col gap-2 mb-2">
@@ -131,8 +84,8 @@ export default function LoginPage() {
               Forgot Password?
             </Link>
           </div>
-          <Button onClick={handleLogin} loading={loading}>
-            Sign In as {role === "patient" ? "Patient" : "Doctor"}
+          <Button type="button" onClick={handleLogin} loading={loading}>
+            Sign In
           </Button>
         </div>
 
@@ -146,7 +99,7 @@ export default function LoginPage() {
         <p className="text-sm text-gray-400 mt-2">
           Don&apos;t have an account?{" "}
           <Link
-            href={role === "doctor" ? "/admin/registerDoctor" : "/register/patient"}
+            href="/register/patient"
             className="font-semibold"
             style={{ color: "var(--primary-blue)" }}
           >

@@ -5,11 +5,11 @@ import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";
 import { usePathname } from "next/navigation";
-import Button from "@/components/ui/Button.jsx";
+import { Bell } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Doctors", href: "/doctors" },
+  { label: "Doctors", href: "/findDoctors" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -23,14 +23,13 @@ export default function Navbar() {
     const user = getSessionValue("user");
     if (user) {
       setIsLoggedIn(true);
-      setUser(user);
+      setUser(JSON.parse(user));
     }
   }, []);
 
   // helper to compute initial
   const getFirstChar = (user) => {
     const fullName = user?.profile?.fullName;
-    console.log(fullName);
     if (typeof fullName === "string" && fullName.trim().length > 0) {
       return fullName.trim().charAt(0).toUpperCase();
     }
@@ -83,22 +82,29 @@ export default function Navbar() {
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              // show circular initial when logged in
-              <Link
-                href={user?.role === "patient" ? "/patient" : "/"}
-                className="flex items-center"
-              >
-                <div
-                  title={
-                    typeof user?.profile?.fullName === "string"
-                      ? user.profile.fullName
-                      : user?.role
-                  }
-                  className="h-9 w-9 rounded-full flex items-center justify-center bg-[var(--primary-blue)] text-white font-semibold"
+              // notifications bell + circular initial when logged in
+              <>
+                <Link href="/notifications" className="relative mr-2">
+                  <Bell className="h-5 w-5 text-[var(--dark-navy)]" />
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
+                </Link>
+
+                <Link
+                  href={user?.role === "patient" ? "/patient/me" : "/"}
+                  className="flex items-center"
                 >
-                  {getFirstChar(user)}
-                </div>
-              </Link>
+                  <div
+                    title={
+                      typeof user?.profile?.fullName === "string"
+                        ? user.profile.fullName
+                        : user?.role
+                    }
+                    className="h-9 w-9 rounded-full flex items-center justify-center bg-[var(--primary-blue)] text-white font-semibold"
+                  >
+                    {getFirstChar(user)}
+                  </div>
+                </Link>
+              </>
             ) : (
               <>
                 <Link

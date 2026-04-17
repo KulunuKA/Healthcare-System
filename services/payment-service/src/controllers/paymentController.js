@@ -15,6 +15,7 @@ const initiatePayment = asyncHandler(async (req, res) => {
 
   const payment = await Payment.create({
     appointmentId,
+    patientId: req.user.sub, 
     provider,
     amount: Number(formattedAmount),
     status: "initiated",
@@ -55,6 +56,16 @@ const initiatePayment = asyncHandler(async (req, res) => {
       provider,
       payhereData,
     },
+  });
+});
+
+const listMyPayments = asyncHandler(async (req, res) => {
+  const payments = await Payment.find({ patientId: req.user.sub })
+    .sort({ createdAt: -1 }); 
+
+  return response.sendSuccess(res, {
+    message: "payment history",
+    data: payments,
   });
 });
 
@@ -125,4 +136,5 @@ module.exports = {
   initiatePayment,
   getPayment,
   webhookPayment,
+  listMyPayments, 
 };

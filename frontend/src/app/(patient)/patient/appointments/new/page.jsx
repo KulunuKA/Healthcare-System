@@ -28,52 +28,30 @@ export default function NewAppointmentPage() {
   const handleBookAppointment = async (appointmentData) => {
     setLoading(true);
     try {
-      const response = await bookAppointment(appointmentData);
+      await bookAppointment(appointmentData);
       message.success("Appointment booked successfully!");
-      // Redirect to appointments list
       setTimeout(() => {
         router.push("/patient/appointments");
       }, 1500);
     } catch (error) {
       console.error("Booking failed:", error);
-      throw error;
+      message.error("Failed to book appointment");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loadingDoctor) {
-    return (
-      <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <Spin size="large" tip="Loading..." />
-      </div>
-    );
-  }
-
-  if (!doctor) {
-    return (
-      <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <Empty description="Doctor not found" style={{ marginTop: "50px" }} />
-      </div>
-    );
-  }
+  if (loadingDoctor) return <div style={{ textAlign: "center", padding: "100px" }}><Spin size="large" /></div>;
+  if (!doctor) return <div style={{ padding: "20px" }}><Empty description="Doctor not found" /></div>;
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1
-        style={{
-          marginBottom: "30px",
-          textAlign: "center",
-          fontSize: "32px",
-          fontWeight: "bold",
-        }}
-      >
+      <h1 style={{ marginBottom: "30px", textAlign: "center", fontSize: "32px", fontWeight: "bold" }}>
         Schedule Your Appointment
       </h1>
-
       <AppointmentBookingForm
         doctorId={doctor._id || doctor.id}
-        doctorName={doctor.fullName}
+        doctorName={doctor.name} // FIXED: Changed from fullName to name
         specialty={doctor.specialty}
         onSubmit={handleBookAppointment}
         loading={loading}
