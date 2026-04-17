@@ -22,6 +22,8 @@ function buildAppointmentPublicView(appt, doctorData = null) {
     statusUpdatedAt: appt.statusUpdatedAt,
     reason: appt.reason,
     notes: appt.notes,
+    isTelemedicineRequest: Boolean(appt.isTelemedicineRequest),
+    createdAt: appt.createdAt,
   };
 }
 

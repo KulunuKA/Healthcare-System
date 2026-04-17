@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import TelemedicineRequestsSection from "@/components/doctor/TelemedicineRequestsSection";
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
@@ -182,6 +183,8 @@ export default function DoctorDashboard() {
           </div>
         </div>
       </div>
+
+      <TelemedicineRequestsSection />
     </div>
   );
 }

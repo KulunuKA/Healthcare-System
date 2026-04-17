@@ -4,6 +4,9 @@ import {
   loginPatientAPI,
   getDoctorsBySpecialtyAPI,
   bookAppointmentAPI,
+  createTelemedicineRequestAPI,
+  getMyTelemedicineRequestsAPI,
+  cancelTelemedicineRequestAPI,
   getPatientAppointmentsAPI,
   cancelAppointmentAPI,
 } from "@/services/patient.service";
@@ -25,8 +28,11 @@ export const PatientProvider = ({ children }) => {
   const router = useRouter();
   const { setUser } = useAuth();
   const [appointments, setAppointments] = useState([]);
+  const [telemedicineRequests, setTelemedicineRequests] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [loadingTelemedicineRequests, setLoadingTelemedicineRequests] =
+    useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
 
   const getToken = () => getSessionValue("accessToken");
@@ -152,6 +158,24 @@ export const PatientProvider = ({ children }) => {
     }
   }, []);
 
+  const fetchTelemedicineRequests = useCallback(async () => {
+    setLoadingTelemedicineRequests(true);
+    try {
+      const token = getToken();
+      const response = await getMyTelemedicineRequestsAPI(token);
+      const list = response.data?.data?.requests;
+      const arr = Array.isArray(list) ? list : [];
+      setTelemedicineRequests(arr);
+      return arr;
+    } catch (error) {
+      console.error("Error fetching telemedicine requests:", error);
+      setTelemedicineRequests([]);
+      throw error;
+    } finally {
+      setLoadingTelemedicineRequests(false);
+    }
+  }, []);
+
   const bookAppointment = async (appointmentData) => {
     try {
       const token = getToken();
@@ -162,6 +186,42 @@ export const PatientProvider = ({ children }) => {
       console.error("Error booking appointment:", error);
       throw (
         error.response?.data || error.message || "Failed to book appointment"
+      );
+    }
+  };
+
+  const submitTelemedicineRequest = async ({ doctorId, reason, notes }) => {
+    try {
+      const token = getToken();
+      const response = await createTelemedicineRequestAPI(token, {
+        doctorId,
+        reason,
+        notes,
+      });
+      await fetchTelemedicineRequests();
+      return response.data;
+    } catch (error) {
+      console.error("Error submitting telemedicine request:", error);
+      throw (
+        error.response?.data ||
+        error.message ||
+        "Failed to submit telemedicine request"
+      );
+    }
+  };
+
+  const cancelTelemedicineRequest = async (requestId) => {
+    try {
+      const token = getToken();
+      const response = await cancelTelemedicineRequestAPI(token, requestId);
+      await fetchTelemedicineRequests();
+      return response.data;
+    } catch (error) {
+      console.error("Error cancelling telemedicine request:", error);
+      throw (
+        error.response?.data ||
+        error.message ||
+        "Failed to cancel request"
       );
     }
   };
@@ -186,13 +246,18 @@ export const PatientProvider = ({ children }) => {
         registerPatient,
         loginPatient,
         appointments,
+        telemedicineRequests,
         doctors,
         loadingAppointments,
+        loadingTelemedicineRequests,
         loadingDoctors,
         fetchPatientAppointments,
+        fetchTelemedicineRequests,
         bookAppointment,
         cancelAppointment,
         fetchDoctorsBySpecialty,
+        submitTelemedicineRequest,
+        cancelTelemedicineRequest,
       }}
     >
       {children}
