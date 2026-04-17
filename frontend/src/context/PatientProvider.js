@@ -32,7 +32,7 @@ export const PatientProvider = ({ children }) => {
       if (response.status === 201) {
         const data = response.data.data;
         //store token and user info in localStorage or context
-        setSession("ç", data.token);
+        setSession("accessToken", data.token);
         setSession("user", JSON.stringify(data.user));
 
         //redirect to patient dashboard or home page
@@ -51,11 +51,6 @@ export const PatientProvider = ({ children }) => {
     <PatientContext.Provider
       value={{
         registerPatient,
-        loginPatient,
-        fetchDoctorsBySpecialty,
-        bookAppointment,
-        fetchPatientAppointments,
-        cancelAppointment,
         appointments,
         doctors,
         loadingAppointments,

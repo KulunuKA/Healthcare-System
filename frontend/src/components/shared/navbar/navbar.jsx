@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";

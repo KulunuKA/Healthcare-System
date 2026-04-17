@@ -8,22 +8,22 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
 
-  useEffect(() => {
-    const token = getSessionValue("accessToken");
-    const user = getSessionValue("user");
+  // useEffect(() => {
+  //   const token = getSessionValue("accessToken");
+  //   const user = getSessionValue("user");
 
-    if (token) {
-      setUser(user);
-      if (user.role === "patient") {
-        router.push("/patient");
-      }
-    } else {
-      router.push("/login"); // redirect unauthenticated users
-    }
+  //   if (token) {
+  //     setUser(user);
+  //     if (user.role === "patient") {
+  //       router.push("/patient");
+  //     }
+  //   } else {
+  //     router.push("/login"); // redirect unauthenticated users
+  //   }
 
   //   setLoading(false);
   // }, []);
@@ -45,4 +45,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext)
