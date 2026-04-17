@@ -14,7 +14,7 @@ const registerRoute = asyncHandler(async (req, res) => {
       phone: phone || "",
     },
   });
-  return sendSuccess(res, { statusCode: 201, message: "registered", data: { token: result.token, user: { role: result.patient.role } } });
+  return sendSuccess(res, { statusCode: 201, message: "registered", data: { token: result.token, user: { role: result.patient.role , profile: result.patient.profile } } });
 });
 
 const loginRoute = asyncHandler(async (req, res) => {
