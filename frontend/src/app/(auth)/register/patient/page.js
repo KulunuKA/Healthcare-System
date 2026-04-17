@@ -43,7 +43,7 @@ export default function PatientRegisterPage() {
       // Call the registerPatient function from the context
       await registerPatient(formData);
     } catch (error) {
-      setErrors((prev) => ({ ...prev, main: error.message }));
+      setErrors((prev) => ({ ...prev, main: error }));
       console.error("Unexpected error during registration:", error);
       // Handle unexpected errors (e.g., show a generic error message)
     } finally {

@@ -13,7 +13,8 @@ export const getSessionValue = (key) => {
   }
 
   try {
-    return sessionStorage.getItem(key);
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
   } catch (error) {
     console.warn("sessionStorage.getItem failed:", error);
     return null;
