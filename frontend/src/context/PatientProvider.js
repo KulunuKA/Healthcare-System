@@ -8,7 +8,7 @@ import {
   cancelAppointmentAPI,
 } from "@/services/patient.service";
 import { setSession, getSessionValue } from "@/utils/session";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 
