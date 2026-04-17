@@ -26,6 +26,8 @@ const TelemedicineRequestSchema = new mongoose.Schema(
     scheduledAt: { type: Date, default: null },
     /** Jitsi (or other) URL; generated on accept. */
     meetingLink: { type: String, default: "" },
+    /** Patient must complete payment before the meeting link is exposed in the patient API. */
+    paid: { type: Boolean, default: false },
     respondedAt: { type: Date, default: null },
   },
   { timestamps: true },

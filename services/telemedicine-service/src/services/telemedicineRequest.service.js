@@ -200,6 +200,30 @@ async function completeRequest({ requestId, doctorId }) {
   return attachPartyInfo(s, "doctor");
 }
 
+/**
+ * Patient completes payment (integrate a real gateway later). Unlocks meeting
+ * link in API responses subject to visibility rules.
+ */
+async function markPaidByPatient({ requestId, patientId }) {
+  const row = await repo.findById(requestId);
+  if (!row) throw new AppError("Request not found", 404);
+  if (String(row.patientId) !== String(patientId)) throw new AppError("Forbidden", 403);
+  if (row.status !== "accepted") {
+    throw new AppError("Payment is only available after the doctor has accepted the request", 400);
+  }
+  if (!row.scheduledAt || !row.meetingLink) {
+    throw new AppError("Session is not fully scheduled yet", 400);
+  }
+  if (row.paid === true) {
+    const s = scrubMeetingLinkForPatient(serializeTelemedicineRequest(row));
+    return attachPartyInfo(s, "patient");
+  }
+
+  const updated = await repo.updateById(requestId, { paid: true });
+  const s = scrubMeetingLinkForPatient(serializeTelemedicineRequest(updated));
+  return attachPartyInfo(s, "patient");
+}
+
 module.exports = {
   createRequest,
   getByIdForUser,
@@ -210,4 +234,5 @@ module.exports = {
   rejectRequest,
   cancelRequest,
   completeRequest,
+  markPaidByPatient,
 };
