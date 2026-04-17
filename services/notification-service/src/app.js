@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const { requestId, logRequests, errorHandler, notFound } = require("@hc/shared");
 const internalRoutes = require("./routes/internalRoutes");
+const notificationRoutes = require('./routes/notificationRoutes');
 
 function createApp() {
   const app = express();
@@ -14,7 +15,9 @@ function createApp() {
   app.use(logRequests);
 
   app.get("/health", (req, res) => res.json({ success: true, message: "notification-service ok" }));
+  
   app.use("/internal", internalRoutes);
+  app.use("/notifications", notificationRoutes);
 
   app.use(notFound);
   app.use(errorHandler);
