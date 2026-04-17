@@ -22,6 +22,12 @@ function createApp() {
   app.use("/", doctorRoutes);
   app.use("/internal", internalRoutes);
 
+  // Backwards/compat: support API-gateway style prefixes too.
+  app.use("/api/doctors/auth", authRoutes);
+  app.use("/api/doctors/me", profileRoutes);
+  app.use("/api/doctors", doctorRoutes);
+  app.use("/api/doctors/internal", internalRoutes);
+
   app.use(notFound);
   app.use(errorHandler);
   return app;

@@ -10,10 +10,13 @@ const updateProfile = asyncHandler(async (req, res) => {
   const updated = await doctorService.updateProfile(req.user.sub, {
     fullName: req.body?.fullName || "",
     specialty: req.body?.specialty || "",
+    offerTelemedicine: req.body?.offerTelemedicine,
     verified: req.body?.verified,
   });
-  return response.sendSuccess(res, { message: "profile updated", data: updated });
+  return response.sendSuccess(res, {
+    message: "profile updated",
+    data: updated,
+  });
 });
 
 module.exports = { getProfile, updateProfile };
-
