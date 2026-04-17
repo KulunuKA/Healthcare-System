@@ -37,8 +37,8 @@ export const PatientProvider = ({ children }) => {
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [profile, setProfile] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const getToken = () => getSessionValue("accessToken");
 
@@ -323,7 +323,9 @@ export const PatientProvider = ({ children }) => {
         updatePatientProfile,
         getNotifications,
         markNotificationRead,
-        profile
+        profile,
+        saving,
+        notifications
       }}
     >
       {children}
