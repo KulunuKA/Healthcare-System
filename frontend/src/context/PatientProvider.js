@@ -16,7 +16,7 @@ export const PatientProvider = ({ children }) => {
       if (response.status === 201) {
         const data = response.data.data;
         //store token and user info in localStorage or context
-        setSession("ç", data.token);
+        setSession("accessToken", data.token);
         setSession("user", JSON.stringify(data.user));
 
         //redirect to patient dashboard or home page
@@ -26,7 +26,7 @@ export const PatientProvider = ({ children }) => {
     } catch (error) {
       console.error("Error registering patient:", error);
       throw (
-        error.response.data || error.message || "Failed to register patient"
+        error?.response?.data?.message || error?.message || "Failed to register patient"
       );
     }
   };
