@@ -145,7 +145,6 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
       .lean()
       .exec();
 
-    // Fetch doctor details for each appointment
     const appointmentsWithDoctors = await Promise.all(
       appts.map(async (appt) => {
         try {
@@ -184,7 +183,6 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders?.();
 
-    // Send initial snapshot
     res.write(
       `event: snapshot\ndata: ${JSON.stringify({ status: appointment.status })}\n\n`,
     );

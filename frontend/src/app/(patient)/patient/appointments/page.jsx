@@ -20,27 +20,15 @@ import {
 } from "@ant-design/icons";
 import PatientTmRequestCard from "@/components/telemedicine/PatientTmRequestCard";
 import { usePatient } from "@/context/PatientProvider";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const statusColors = {
-  scheduled: "processing",
-  accepted: "success",
-  rejected: "error",
-  cancelled: "default",
-  completed: "cyan",
-};
-
-const statusLabels = {
-  scheduled: "Pending",
-  accepted: "Confirmed",
-  rejected: "Rejected",
-  cancelled: "Cancelled",
-  completed: "Completed",
-};
+const statusColors = { scheduled: "processing", accepted: "success", rejected: "error", cancelled: "default", completed: "cyan" };
+const statusLabels = { scheduled: "Pending", accepted: "Confirmed", rejected: "Rejected", cancelled: "Cancelled", completed: "Completed" };
 
 export default function AppointmentsPage() {
   const {
