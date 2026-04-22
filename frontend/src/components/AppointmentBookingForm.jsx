@@ -19,6 +19,7 @@ export default function AppointmentBookingForm({
   doctorId,
   doctorName,
   specialty,
+  telemedicine = false,
   onSubmit,
   loading = false,
 }) {
@@ -27,13 +28,34 @@ export default function AppointmentBookingForm({
   const [selectedTime, setSelectedTime] = useState(null);
   const [reason, setReason] = useState("");
 
-  const handleSubmit = async (values) => {
+  const handleTelemedicineSubmit = async (values) => {
+    const trimmedReason = (values.reason || "").trim();
+    if (!trimmedReason) {
+      message.error("Please enter a reason for telemedicine.");
+      return;
+    }
+
+    const appointmentData = {
+      doctorId,
+      reason: trimmedReason,
+      notes: (values.notes || "").trim(),
+    };
+
+    try {
+      await onSubmit(appointmentData);
+      form.resetFields();
+    } catch (error) {
+      console.error("Error submitting telemedicine request:", error);
+      message.error(error.message || "Failed to submit request");
+    }
+  };
+
+  const handleStandardSubmit = async (values) => {
     if (!selectedDate || !selectedTime) {
       message.error("Please select both date and time");
       return;
     }
 
-    // Combine date and time
     const appointmentDateTime = selectedDate
       .hour(selectedTime.hour())
       .minute(selectedTime.minute());
@@ -47,7 +69,6 @@ export default function AppointmentBookingForm({
 
     try {
       await onSubmit(appointmentData);
-      message.success("Appointment booked successfully!");
       form.resetFields();
       setSelectedDate(null);
       setSelectedTime(null);
@@ -63,28 +84,92 @@ export default function AppointmentBookingForm({
       <h2
         style={{ marginBottom: "20px", fontSize: "24px", fontWeight: "bold" }}
       >
-        Book Appointment with Dr. {doctorName}
+        {telemedicine ? "Telemedicine request" : "Book appointment"} — Dr.{" "}
+        {doctorName}
       </h2>
-
-      <Alert
-        message={`Specialty: ${specialty}`}
-        type="info"
-        style={{ marginBottom: "20px" }}
-        showIcon
-      />
 
       {loading ? (
         <div style={{ textAlign: "center", padding: "40px" }}>
-          <Spin size="large" description="Booking appointment..." />
+          <Spin size="large" description="Loading..." />
         </div>
+      ) : telemedicine ? (
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleTelemedicineSubmit}
+          autoComplete="off"
+        >
+          <div
+            style={{
+              marginBottom: "20px",
+              padding: "12px 14px",
+              background: "#f0f5ff",
+              borderRadius: "8px",
+              border: "1px solid #adc6ff",
+            }}
+          >
+            <div style={{ fontSize: "13px", color: "#666", marginBottom: "4px" }}>
+              Doctor specialty
+            </div>
+            <div style={{ fontSize: "16px", fontWeight: 600, color: "#1d39c4" }}>
+              {specialty || "—"}
+            </div>
+          </div>
+
+          <Form.Item
+            name="reason"
+            label="Reason for telemedicine"
+            rules={[
+              { required: true, message: "Please describe your reason" },
+            ]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Describe why you are requesting a remote consultation"
+            />
+          </Form.Item>
+
+          <Form.Item name="notes" label="Additional notes (optional)">
+            <Input.TextArea
+              rows={3}
+              placeholder="Symptoms, preferred contact method, or other context for the doctor"
+            />
+          </Form.Item>
+
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: "24px" }}
+            message="What happens next"
+            description="The doctor will review your request and schedule a time. After approval, you will pay a session fee to unlock your video link when it becomes available."
+          />
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+              loading={loading}
+            >
+              Submit telemedicine request
+            </Button>
+          </Form.Item>
+        </Form>
       ) : (
         <Form
           form={form}
           layout="vertical"
-          onFinish={handleSubmit}
+          onFinish={handleStandardSubmit}
           autoComplete="off"
         >
-          {/* Reason for Visit */}
+          <Alert
+            message={`Specialty: ${specialty}`}
+            type="info"
+            style={{ marginBottom: "20px" }}
+            showIcon
+          />
+
           <Form.Item
             label="Reason for Visit"
             required
@@ -98,7 +183,6 @@ export default function AppointmentBookingForm({
             />
           </Form.Item>
 
-          {/* Date Selection */}
           <Form.Item
             label={
               <>
@@ -110,7 +194,6 @@ export default function AppointmentBookingForm({
             <DatePicker
               style={{ width: "100%" }}
               disabledDate={(current) => {
-                // Disable past dates
                 return current && current.isBefore(dayjs().startOf("day"));
               }}
               value={selectedDate}
@@ -118,7 +201,6 @@ export default function AppointmentBookingForm({
             />
           </Form.Item>
 
-          {/* Time Selection */}
           <Form.Item
             label={
               <>
@@ -136,7 +218,6 @@ export default function AppointmentBookingForm({
             />
           </Form.Item>
 
-          {/* Additional Notes */}
           <Form.Item label="Additional Notes (Optional)" name="notes">
             <Input.TextArea
               placeholder="Any additional information for the doctor"
@@ -144,7 +225,6 @@ export default function AppointmentBookingForm({
             />
           </Form.Item>
 
-          {/* Summary */}
           {selectedDate && selectedTime && (
             <Card
               style={{
@@ -166,7 +246,6 @@ export default function AppointmentBookingForm({
             </Card>
           )}
 
-          {/* Submit Button */}
           <Form.Item>
             <Button
               type="primary"

@@ -7,6 +7,20 @@ const {
   canAccess,
 } = require("../services/appointmentHelpers");
 
+// helper to send internal notification
+const NOTIF_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL;
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || process.env.NOTIFICATION_INTERNAL_TOKEN;
+
+async function sendNotification(receiptId, type, message) {
+  if (!NOTIF_SERVICE_URL || !INTERNAL_TOKEN) return;
+  try {
+    const url = `${NOTIF_SERVICE_URL.replace(/\/$/, "")}/internal/notifications`;
+    await axios.post(url, { receiptId, type, message }, { headers: { "x-internal-token": INTERNAL_TOKEN } });
+  } catch (e) {
+    console.error("Failed to send notification", e?.response?.data || e.message);
+  }
+}
+
 function createAppointmentController({ appointmentSseBroadcaster }) {
   const searchDoctors = asyncHandler(async (req, res) => {
     const specialty = req.query.specialty;
@@ -24,40 +38,67 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
 
   const bookAppointment = asyncHandler(async (req, res) => {
     const { doctorId, startAt, reason, notes } = req.body || {};
+
     if (!doctorId) throw new AppError("doctorId is required", 400);
     if (!startAt) throw new AppError("startAt is required", 400);
 
-    const appointment = await Appointment.create({
-      patientId: req.user.sub,
-      doctorId,
-      startAt: new Date(startAt),
-      reason: reason || "",
-      notes: notes || "",
-      status: "scheduled",
-      events: [{ type: "booked", detail: "Appointment scheduled" }],
-    });
+    let appointment;
+    try {
+      appointment = await Appointment.create({
+        patientId: req.user.sub,
+        doctorId,
+        startAt: new Date(startAt),
+        isTelemedicineRequest: false,
+        reason: reason || "",
+        notes: notes || "",
+        status: "scheduled",
+        events: [{ type: "booked", detail: "Appointment scheduled" }],
+      });
 
-    // Notify asynchronously (best-effort)
-    if (config.NOTIFICATION_SERVICE_URL) {
-      axios
-        .post(
-          `${config.NOTIFICATION_SERVICE_URL}/internal/appointment-booked`,
-          { appointmentId: appointment._id, patientId: req.user.sub, doctorId },
-          { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } },
-        )
-        .catch(() => {});
+      // Notify asynchronously (best-effort)
+      if (config.NOTIFICATION_SERVICE_URL) {
+        axios
+          .post(
+            `${config.NOTIFICATION_SERVICE_URL}/internal/appointment-booked`,
+            { appointmentId: appointment._id, patientId: req.user.sub, doctorId },
+            { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } },
+          )
+          .catch(() => {});
+      }
+
+      appointmentSseBroadcaster?.publish(appointment._id, {
+        status: appointment.status,
+        appointmentId: appointment._id,
+      });
+
+      // send notification to patient about successful booking
+      try {
+        const patientId = appointment?.patient || appointment?.patientId || req.user?.id || req.user?._id;
+        if (patientId) {
+          await sendNotification(patientId, "appointment_booked", `Your appointment on ${appointment.date || appointment.scheduledAt || 'scheduled time'} is confirmed.`);
+        }
+      } catch (e) {
+        console.error("notify after booking failed", e);
+      }
+
+      return response.sendSuccess(res, {
+        statusCode: 201,
+        message: "appointment booked",
+        data: { appointment: buildAppointmentPublicView(appointment) },
+      });
+    } catch (error) {
+      // on failure, attempt to notify user if we have id
+      try {
+        const patientId = req.user?.id || req.user?._id || req.body?.patientId;
+        if (patientId) {
+          await sendNotification(patientId, "appointment_failed", `Failed to book your appointment: ${error.message || 'unknown error'}`);
+        }
+      } catch (e) {
+        console.error("notify on failure failed", e);
+      }
+
+      throw error;
     }
-
-    appointmentSseBroadcaster?.publish(appointment._id, {
-      status: appointment.status,
-      appointmentId: appointment._id,
-    });
-
-    return response.sendSuccess(res, {
-      statusCode: 201,
-      message: "appointment booked",
-      data: { appointment: buildAppointmentPublicView(appointment) },
-    });
   });
 
   const cancelAppointment = asyncHandler(async (req, res) => {
@@ -100,7 +141,7 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
     else throw new AppError("Forbidden", 403);
 
     const appts = await Appointment.find(filter)
-      .sort({ startAt: -1 })
+      .sort({ createdAt: -1 })
       .lean()
       .exec();
 

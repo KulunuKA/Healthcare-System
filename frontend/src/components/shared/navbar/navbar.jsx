@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";
 import { usePathname } from "next/navigation";
 import { Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -15,9 +15,9 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const user = getSessionValue("user");
@@ -27,6 +27,7 @@ export default function Navbar() {
     }
   }, []);
 
+  const pathname = usePathname();
   // helper to compute initial
   const getFirstChar = (user) => {
     const fullName = user?.profile?.fullName;
@@ -68,15 +69,19 @@ export default function Navbar() {
 
           {/* Nav Links */}
           <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-[var(--text-gray)] transition-colors duration-200 hover:text-[var(--primary-blue)]"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = pathname === link.href || pathname?.startsWith(link.href + "/");
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`relative text-sm font-medium transition-colors duration-200 ${active ? 'text-[var(--primary-blue)]' : 'text-[var(--text-gray)] hover:text-[var(--primary-blue)]'}`}
+                >
+                  {link.label}
+                  {active && <span className="absolute left-0 right-0 -bottom-2 h-0.5 bg-[var(--primary-blue)] rounded" />}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* CTA Buttons */}
@@ -114,7 +119,7 @@ export default function Navbar() {
                   Login
                 </Link>
                 <p
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={()=>router.push("/patient/register")}
                   className="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity duration-200 hover:opacity-90"
                   style={{ backgroundColor: "var(--primary-blue)" }}
                 >
@@ -125,12 +130,6 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-
-      {/* register modal */}
-      <RegisterModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 }
