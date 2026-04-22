@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import RegisterModal from "@/components/RegisterModal";
 import Link from "next/link";
 import { getSessionValue } from "@/utils/session";
 import { usePathname } from "next/navigation";
 import { Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -15,9 +15,9 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const user = getSessionValue("user");
@@ -119,7 +119,7 @@ export default function Navbar() {
                   Login
                 </Link>
                 <p
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={()=>router.push("/patient/register")}
                   className="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity duration-200 hover:opacity-90"
                   style={{ backgroundColor: "var(--primary-blue)" }}
                 >
@@ -130,12 +130,6 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-
-      {/* register modal */}
-      <RegisterModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 }

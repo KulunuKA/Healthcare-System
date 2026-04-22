@@ -126,9 +126,6 @@ export const patientAPI = {
   updateProfile: (profileData) => {
     return axiosInstance.put(`${API_BASE_URL}/me`, profileData);
   },
-  changePassword: (passwordData) => {
-    return axiosInstance.put(`${API_BASE_URL}/me/password`, passwordData);
-  },
   getNotifications: () => {
     return axiosInstance.get(`${NOTIFICATION_API_BASE}/notifications`);
   },

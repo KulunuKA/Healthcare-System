@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }) => {
       } catch (e) {
         setUser(user);
       }
-      // if (user.role === "patient") {
-      //   router.push("/patient");
-      // }
+      if (user.role === "patient") {
+        router.push("/");
+      }
     } else {
       router.push("/login"); // redirect unauthenticated users
     }
