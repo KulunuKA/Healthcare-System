@@ -9,13 +9,15 @@ import {
   Input,
   Spin,
   Empty,
-  Badge,
   Tag,
   message,
 } from "antd";
-import { SearchOutlined, TeamOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  TeamOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
 import { usePatient } from "@/context/PatientProvider";
-import Link from "next/link";
 
 const specialties = [
   "General Physician",
@@ -63,12 +65,10 @@ export default function DoctorsPage() {
 
   // FIXED: Updated to use 'name' to match your MongoDB Compass screenshot
   useEffect(() => {
-    const doctorList = Array.isArray(doctors) ? doctors : [];
-    const filtered = doctorList.filter((doctor) => {
-      const nameMatch = (doctor.name || "").toLowerCase().includes(searchText.toLowerCase());
-      const emailMatch = (doctor.email || "").toLowerCase().includes(searchText.toLowerCase());
-      return nameMatch || emailMatch;
-    });
+    const q = searchText.toLowerCase().trim();
+    const filtered = (Array.isArray(doctors) ? doctors : []).filter((doctor) =>
+      doctor.fullName?.toLowerCase().includes(q),
+    );
     setFilteredDoctors(filtered);
   }, [doctors, searchText]);
 
@@ -99,7 +99,7 @@ export default function DoctorsPage() {
               Search Doctor
             </label>
             <Input
-              placeholder="Search by name or email"
+              placeholder="Search by doctor name"
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -147,9 +147,6 @@ export default function DoctorsPage() {
               </div>
 
               <div style={{ marginBottom: "15px", flex: 1 }}>
-                <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
-                  <strong>Email:</strong> {doctor.email || "N/A"}
-                </p>
                 {doctor.experience && (
                   <p style={{ margin: "5px 0", color: "#666", fontSize: "14px" }}>
                     <strong>Experience:</strong> {doctor.experience} years
@@ -170,11 +167,34 @@ export default function DoctorsPage() {
                 )}
               </div>
 
-              <Link href={`/patient/appointments/new?doctorId=${doctor._id || doctor.id}`}>
-                <Button type="primary" block>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <Button
+                  type="primary"
+                  block
+                  href={`/patient/appointments/new?doctorId=${encodeURIComponent(
+                    String(doctor._id ?? doctor.id),
+                  )}`}
+                >
                   Book Appointment
                 </Button>
-              </Link>
+                {doctor.offerTelemedicine ? (
+                  <Button
+                    block
+                    icon={<VideoCameraOutlined />}
+                    href={`/patient/appointments/new?doctorId=${encodeURIComponent(
+                      String(doctor._id ?? doctor.id),
+                    )}&telemedicine=true`}
+                  >
+                    Book for telemedicine
+                  </Button>
+                ) : null}
+              </div>
             </Card>
           ))}
         </div>

@@ -9,12 +9,8 @@ async function connectMongo() {
   console.log("Connecting to MongoDB with URI:", uri);
   
   mongoose.set("strictQuery", true);
-  await mongoose.connect(uri, {
-    autoIndex: config.env !== "production",
-  });
-
-  logger.info("connected to mongo", { db: MONGODB_DB });
+  await mongoose.connect(uri, { autoIndex: config.env !== "production" });
+  logger.info("connected to mongo", { db: config.MONGODB_DB });
 }
 
 module.exports = { connectMongo };
-

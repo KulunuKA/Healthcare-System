@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { PatientProvider } from "@/context/PatientProvider";
 import { useAuth } from "@/context/AuthProvider";
 import { User, CreditCard, Calendar, MessageSquare, Settings, LogOut } from "lucide-react";
+import { Modal } from "antd";
 
 export default function PatientLayout({ children }) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { confirm } = Modal;
 
   const nav = [
     { label: "Profile", href: "/patient/me", icon: User },
@@ -41,7 +43,13 @@ export default function PatientLayout({ children }) {
 
           <div className="px-4 py-4 border-t">
             <button
-              onClick={logout}
+              onClick={() => {
+                confirm({
+                  title: "Confirm Logout",
+                  content: "Are you sure you want to logout?",
+                  onOk: () => logout(),
+                });
+              }}
               className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
