@@ -10,8 +10,8 @@
     "shared"
   ],
   "scripts": {
-    "dev": "echo \"Use docker-compose for multi-service dev\"",
-    "start": "docker compose up --build"
+    "dev": "node init && echo \"Use docker-compose for multi-service dev\"",
+    "start": "node init && docker compose up --build"
   },
   "main": "index.js",
   "devDependencies": {
