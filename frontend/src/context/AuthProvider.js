@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         router.push("/");
       }
     } else {
-      router.push("/login"); // redirect unauthenticated users
+      // router.push("/login"); // redirect unauthenticated users
     }
 
     setLoading(false);

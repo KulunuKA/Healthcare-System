@@ -38,7 +38,7 @@ export const PayButton = ({ appointmentId, amount, patientDetails, token }) => {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/payments/initiate",
+        "http://localhost:3000/api/payments/initiate",
         {
           provider: "payhere",
           appointmentId,

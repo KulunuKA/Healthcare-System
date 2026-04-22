@@ -11,11 +11,16 @@ const initiatePayment = asyncHandler(async (req, res) => {
     throw new AppError("provider, appointmentId, and amount are required", 400);
   }
 
-  const formattedAmount = parseFloat(amount).toFixed(2);
+  // normalize amount
+  const parsed = Number(parseFloat(amount));
+  if (Number.isNaN(parsed)) {
+    throw new AppError("invalid amount", 400);
+  }
+  const formattedAmount = parsed.toFixed(2);
 
   const payment = await Payment.create({
     appointmentId,
-    patientId: req.user.sub, 
+    patientId: (req.user && req.user.sub) || null,
     provider,
     amount: Number(formattedAmount),
     status: "initiated",
@@ -24,11 +29,20 @@ const initiatePayment = asyncHandler(async (req, res) => {
   let payhereData = null;
 
   if (provider === "payhere") {
+    // validate payhere configuration
+    if (!config.PAYHERE_MERCHANT_ID || !config.PAYHERE_SECRET) {
+      throw new AppError('Payment provider PayHere not configured (PAYHERE_MERCHANT_ID or PAYHERE_SECRET missing)', 500);
+    }
     const orderId = payment._id.toString();
-    const hash = generatePayHereHash(orderId, formattedAmount, "LKR");
+    const hash = generatePayHereHash(orderId, formattedAmount, "LKR") || "";
+
+    const firstName = (patientDetails && patientDetails.firstName) || "Patient";
+    const lastName = (patientDetails && patientDetails.lastName) || "User";
+    const email = (patientDetails && patientDetails.email) || "test@example.com";
+    const phone = (patientDetails && patientDetails.phone) || "0771234567";
 
     payhereData = {
-      merchant_id: 1234895, 
+      merchant_id: config.PAYHERE_MERCHANT_ID,
       return_url: "http://localhost:3000/patient/appointments",
       cancel_url: "http://localhost:3000/patient/payment-failed",
       notify_url: "https://cone-quartered-scribe.ngrok-free.dev/webhooks/payhere",
@@ -36,19 +50,19 @@ const initiatePayment = asyncHandler(async (req, res) => {
       items: "Doctor Consultation",
       currency: "LKR",
       amount: formattedAmount,
-      hash,
-      first_name: patientDetails?.firstName || "Patient",
-      last_name: patientDetails?.lastName || "User",
-      email: patientDetails?.email || "test@example.com",
-      phone: patientDetails?.phone || "0771234567",
+      hash: hash,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
       address: "Colombo",
       city: "Colombo",
       country: "Sri Lanka",
     };
   }
 
-  return response.sendSuccess(res, {
-    statusCode: 201,
+  // Send a well-formed JSON response directly to avoid relying on a wrapper that may send undefined
+  return res.status(201).json({
     message: "payment initiated",
     data: {
       paymentId: payment._id,

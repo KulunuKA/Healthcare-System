@@ -9,13 +9,12 @@ async function main() {
   await connectMongo();
   const app = createApp();
   app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
     console.log(`payment-service listening on :${PORT}`);
   });
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
+  console.error("payment-service failed to start:", err);
   console.error("payment-service failed to start:", err);
   process.exit(1);
 });

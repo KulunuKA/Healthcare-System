@@ -1,22 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Card,
-  Button,
-  Tag,
-  Empty,
-  Spin,
-  Modal,
-  message,
-  Tooltip,
-} from "antd";
+import { Card, Button, Tag, Empty, Spin, Modal, message, Tooltip } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   EyeOutlined,
   VideoCameraOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import PatientTmRequestCard from "@/components/telemedicine/PatientTmRequestCard";
 import { usePatient } from "@/context/PatientProvider";
@@ -27,8 +19,20 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const statusColors = { scheduled: "processing", accepted: "success", rejected: "error", cancelled: "default", completed: "cyan" };
-const statusLabels = { scheduled: "Pending", accepted: "Confirmed", rejected: "Rejected", cancelled: "Cancelled", completed: "Completed" };
+const statusColors = {
+  scheduled: "processing",
+  accepted: "success",
+  rejected: "error",
+  cancelled: "default",
+  completed: "cyan",
+};
+const statusLabels = {
+  scheduled: "Pending",
+  accepted: "Confirmed",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
+  completed: "Completed",
+};
 
 export default function AppointmentsPage() {
   const {
@@ -45,6 +49,7 @@ export default function AppointmentsPage() {
   const [cancelingTmId, setCancelingTmId] = useState(null);
   const [payingTmId, setPayingTmId] = useState(null);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     loadAll();
@@ -127,7 +132,9 @@ export default function AppointmentsPage() {
         setPayingTmId(requestId);
         try {
           await payTelemedicineRequest(requestId);
-          message.success("Payment successful. You can join when the link unlocks.");
+          message.success(
+            "Payment successful. You can join when the link unlocks.",
+          );
           await loadAll();
         } catch (err) {
           console.error(err);
@@ -207,7 +214,15 @@ export default function AppointmentsPage() {
               <VideoCameraOutlined style={{ color: "#722ed1" }} />
               Telemedicine requests
             </h2>
-            <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px", maxWidth: "640px", lineHeight: 1.6 }}>
+            <p
+              style={{
+                color: "#64748b",
+                marginBottom: "20px",
+                fontSize: "14px",
+                maxWidth: "640px",
+                lineHeight: 1.6,
+              }}
+            >
               After your doctor approves and sets a time, pay the session fee to
               unlock your video link. The join button appears within two days of
               the scheduled start.
@@ -432,14 +447,26 @@ export default function AppointmentsPage() {
                     )}
 
                     <div style={{ display: "flex", gap: "10px" }}>
-                      <Tooltip title="View Details">
-                        <Button
-                          icon={<EyeOutlined />}
-                          type="default"
-                          block
-                          disabled={appointment.status === "cancelled"}
-                        />
-                      </Tooltip>
+                      <Button
+                        type="primary"
+                        icon={<WalletOutlined />}
+                        style={{
+                          backgroundColor: "#52c41a",
+                          borderColor: "#52c41a",
+                        }}
+                        onClick={() => {
+                          const fee =
+                            appointment.consultationFee ||
+                            appointment.fee ||
+                            2500;
+                          const appId = appointment._id || appointment.id;
+                          router.push(
+                            `/payment?appointmentId=${appId}&amount=${fee}`,
+                          );
+                        }}
+                      >
+                        Pay Now
+                      </Button>
                       {canCancelAppointment(appointment) && (
                         <Button
                           icon={<DeleteOutlined />}
