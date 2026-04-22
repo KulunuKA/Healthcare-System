@@ -88,7 +88,7 @@ export default function NewAppointmentPage() {
       }, 1500);
     } catch (error) {
       console.error("Booking failed:", error);
-      throw error;
+      message.error("Failed to book appointment");
     } finally {
       setLoading(false);
     }
@@ -138,20 +138,12 @@ export default function NewAppointmentPage() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1
-        style={{
-          marginBottom: "30px",
-          textAlign: "center",
-          fontSize: "32px",
-          fontWeight: "bold",
-        }}
-      >
+      <h1 style={{ marginBottom: "30px", textAlign: "center", fontSize: "32px", fontWeight: "bold" }}>
         Schedule Your Appointment
       </h1>
-
       <AppointmentBookingForm
         doctorId={doctor._id || doctor.id}
-        doctorName={doctor.fullName}
+        doctorName={doctor.name} // FIXED: Changed from fullName to name
         specialty={doctor.specialty}
         telemedicine={Boolean(telemedicineBooking)}
         onSubmit={handleBookAppointment}

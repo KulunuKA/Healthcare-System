@@ -7,6 +7,7 @@ import {
   createTelemedicineRequestAPI,
   getMyTelemedicineRequestsAPI,
   cancelTelemedicineRequestAPI,
+  payTelemedicineRequestAPI,
   getPatientAppointmentsAPI,
   cancelAppointmentAPI,
   patientAPI,
@@ -287,6 +288,22 @@ export const PatientProvider = ({ children }) => {
     }
   };
 
+  const payTelemedicineRequest = async (requestId) => {
+    try {
+      const token = getToken();
+      const response = await payTelemedicineRequestAPI(token, requestId);
+      await fetchTelemedicineRequests();
+      return response.data;
+    } catch (error) {
+      console.error("Error paying for telemedicine:", error);
+      throw (
+        error.response?.data ||
+        error.message ||
+        "Payment failed"
+      );
+    }
+  };
+
   const cancelAppointment = async (appointmentId) => {
     try {
       const token = getToken();
@@ -319,6 +336,7 @@ export const PatientProvider = ({ children }) => {
         fetchDoctorsBySpecialty,
         submitTelemedicineRequest,
         cancelTelemedicineRequest,
+        payTelemedicineRequest,
         getPatientProfile,
         updatePatientProfile,
         getNotifications,

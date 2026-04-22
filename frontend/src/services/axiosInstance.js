@@ -5,7 +5,7 @@ import { message } from "antd";
 /*
     @TODO: Change to the local API URL after testing
 */
-export const API_BASE_URL = "http://localhost:3000";
+export const API_BASE_URL = "http://localhost:4000";
 
 let refreshFlag = true;
 

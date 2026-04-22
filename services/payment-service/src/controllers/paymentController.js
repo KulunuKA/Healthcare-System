@@ -15,6 +15,7 @@ const initiatePayment = asyncHandler(async (req, res) => {
 
   const payment = await Payment.create({
     appointmentId,
+    patientId: req.user.sub, 
     provider,
     amount: Number(formattedAmount),
     status: "initiated",
@@ -58,6 +59,16 @@ const initiatePayment = asyncHandler(async (req, res) => {
   });
 });
 
+const listMyPayments = asyncHandler(async (req, res) => {
+  const payments = await Payment.find({ patientId: req.user.sub })
+    .sort({ createdAt: -1 }); 
+
+  return response.sendSuccess(res, {
+    message: "payment history",
+    data: payments,
+  });
+});
+
 const webhookPayment = asyncHandler(async (req, res) => {
   console.log("--- WEBHOOK INCOMING ---");
   console.log("Body:", req.body);
@@ -78,10 +89,8 @@ const webhookPayment = asyncHandler(async (req, res) => {
     payment.status = "succeeded";
     console.log(`Payment ${order_id} marked as SUCCEEDED`);
     
-    // SAVE NOW so the DB reflects success even if services are down
     await payment.save();
 
-    // Try to notify other services
     try {
       await axios.patch(
         `${config.APPOINTMENT_SERVICE_URL}/internal/appointments/${payment.appointmentId}/confirm`,
@@ -127,4 +136,5 @@ module.exports = {
   initiatePayment,
   getPayment,
   webhookPayment,
+  listMyPayments, 
 };

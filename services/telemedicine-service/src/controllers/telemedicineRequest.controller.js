@@ -153,6 +153,17 @@ const complete = asyncHandler(async (req, res) => {
   });
 });
 
+const markPaid = asyncHandler(async (req, res) => {
+  const data = await tmRequestService.markPaidByPatient({
+    requestId: req.params.id,
+    patientId: req.user.sub,
+  });
+  return response.sendSuccess(res, {
+    message: "Payment recorded",
+    data: { request: data },
+  });
+});
+
 module.exports = {
   createRequest,
   listMine,
@@ -163,4 +174,5 @@ module.exports = {
   reject,
   cancel,
   complete,
+  markPaid,
 };

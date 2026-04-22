@@ -63,6 +63,15 @@ export default function DoctorTmRequestCard({
                   Action required
                 </span>
               )}
+              {status === "accepted" && (
+                <span
+                  className={`${styles.pill} ${
+                    req.paid ? styles.pillPaid : styles.pillUnpaid
+                  }`}
+                >
+                  {req.paid ? "Paid" : "Awaiting payment"}
+                </span>
+              )}
             </div>
             {req.patient?.email ? (
               <p

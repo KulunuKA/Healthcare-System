@@ -13,6 +13,7 @@ function serializeTelemedicineRequest(doc) {
   delete o.__v;
   if (o.patientId != null) o.patientId = String(o.patientId);
   if (o.doctorId != null) o.doctorId = String(o.doctorId);
+  o.paid = o.paid === true;
 
   if (o.scheduledAt && o.meetingLink) {
     const sched = new Date(o.scheduledAt);
@@ -28,12 +29,16 @@ function serializeTelemedicineRequest(doc) {
 }
 
 /**
- * Patient-facing: hide meeting link until visibility window.
+ * Patient-facing: hide meeting link until the session is paid for and the
+ * visibility window (e.g. two days before start) is active.
  */
 function scrubMeetingLinkForPatient(serialized) {
   if (!serialized) return null;
-  if (serialized.isMeetingLinkVisible) return serialized;
-  return { ...serialized, meetingLink: null };
+  const paid = serialized.paid === true;
+  if (!paid || !serialized.isMeetingLinkVisible) {
+    return { ...serialized, meetingLink: null };
+  }
+  return serialized;
 }
 
 module.exports = {

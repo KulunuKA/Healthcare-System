@@ -20,27 +20,15 @@ import {
 } from "@ant-design/icons";
 import PatientTmRequestCard from "@/components/telemedicine/PatientTmRequestCard";
 import { usePatient } from "@/context/PatientProvider";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const statusColors = {
-  scheduled: "processing",
-  accepted: "success",
-  rejected: "error",
-  cancelled: "default",
-  completed: "cyan",
-};
-
-const statusLabels = {
-  scheduled: "Pending",
-  accepted: "Confirmed",
-  rejected: "Rejected",
-  cancelled: "Cancelled",
-  completed: "Completed",
-};
+const statusColors = { scheduled: "processing", accepted: "success", rejected: "error", cancelled: "default", completed: "cyan" };
+const statusLabels = { scheduled: "Pending", accepted: "Confirmed", rejected: "Rejected", cancelled: "Cancelled", completed: "Completed" };
 
 export default function AppointmentsPage() {
   const {
@@ -48,12 +36,14 @@ export default function AppointmentsPage() {
     fetchTelemedicineRequests,
     cancelAppointment,
     cancelTelemedicineRequest,
+    payTelemedicineRequest,
     appointments,
     telemedicineRequests,
   } = usePatient();
   const [loading, setLoading] = useState(true);
   const [cancelingId, setCancelingId] = useState(null);
   const [cancelingTmId, setCancelingTmId] = useState(null);
+  const [payingTmId, setPayingTmId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -126,6 +116,33 @@ export default function AppointmentsPage() {
     });
   };
 
+  const handlePayTmRequest = (requestId) => {
+    Modal.confirm({
+      title: "Pay for telemedicine session",
+      content:
+        "Complete payment to unlock your video session link when it becomes available",
+      okText: "Pay now",
+      cancelText: "Not now",
+      onOk: async () => {
+        setPayingTmId(requestId);
+        try {
+          await payTelemedicineRequest(requestId);
+          message.success("Payment successful. You can join when the link unlocks.");
+          await loadAll();
+        } catch (err) {
+          console.error(err);
+          const msg =
+            err?.response?.data?.message ||
+            err?.message ||
+            "Payment could not be completed";
+          message.error(typeof msg === "string" ? msg : "Payment failed");
+        } finally {
+          setPayingTmId(null);
+        }
+      },
+    });
+  };
+
   const canCancelAppointment = (appointment) => {
     return (
       appointment.status !== "cancelled" && appointment.status !== "completed"
@@ -191,8 +208,9 @@ export default function AppointmentsPage() {
               Telemedicine requests
             </h2>
             <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px", maxWidth: "640px", lineHeight: 1.6 }}>
-              Remote consultation requests and approved sessions use the cards
-              below. Meeting links unlock within two days of the scheduled time.
+              After your doctor approves and sets a time, pay the session fee to
+              unlock your video link. The join button appears within two days of
+              the scheduled start.
             </p>
             {tmList.length === 0 ? (
               <Empty
@@ -212,7 +230,9 @@ export default function AppointmentsPage() {
                     key={req.id || req._id}
                     req={req}
                     cancelingTmId={cancelingTmId}
+                    payingTmId={payingTmId}
                     onCancelRequest={handleCancelTmRequest}
+                    onPayRequest={handlePayTmRequest}
                   />
                 ))}
               </div>
