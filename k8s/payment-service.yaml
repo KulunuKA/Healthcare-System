@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: healthcare-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: healthcare-system-payment-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3005
+        envFrom:
+        - configMapRef:
+            name: healthcare-config
+        env:
+        - name: PAYHERE_MERCHANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: merchant-id
+        - name: PAYHERE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: secret
+        - name: WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: webhook-secret
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3005
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: healthcare-system
+spec:
+  selector:
+    app: payment-service
+  ports:
+  - port: 3005
+    targetPort: 3005
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: payment-secrets
+  namespace: healthcare-system
+type: Opaque
+stringData:
+  merchant-id: "your-payhere-merchant-id"
+  secret: "your-payhere-secret"
+  webhook-secret: "your-webhook-secret"

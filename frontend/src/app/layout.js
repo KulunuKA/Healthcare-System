@@ -13,13 +13,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen" suppressHydrationWarning>
-        <LayoutClient>
-          <AuthProvider>
+        <AuthProvider>
+          <LayoutClient>
             <DoctorProvider>
               <PatientProvider>{children}</PatientProvider>
             </DoctorProvider>
-          </AuthProvider>
-        </LayoutClient>
+          </LayoutClient>
+        </AuthProvider>
       </body>
     </html>
   );

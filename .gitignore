@@ -1,10 +1,9 @@
 node_modules
 **/node_modules
-.env
-**/.env
 dist
 build
 *.log
 uploads
 .DS_Store
 
+config.bat
