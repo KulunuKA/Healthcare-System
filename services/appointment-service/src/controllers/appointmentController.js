@@ -7,17 +7,37 @@ const {
   canAccess,
 } = require("../services/appointmentHelpers");
 
-// helper to send internal notification
-const NOTIF_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL;
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || process.env.NOTIFICATION_INTERNAL_TOKEN;
-
+// helper to send internal notification using configured values (read at call time, not module load time)
 async function sendNotification(receiptId, type, message) {
-  if (!NOTIF_SERVICE_URL || !INTERNAL_TOKEN) return;
+  const notifUrl = config.NOTIFICATION_SERVICE_URL || process.env.NOTIFICATION_SERVICE_URL;
+  const token = config.INTERNAL_SERVICE_TOKEN || config.INTERNAL_TOKEN || process.env.INTERNAL_TOKEN || process.env.NOTIFICATION_INTERNAL_TOKEN;
+  
+  if (!notifUrl) {
+    console.warn('sendNotification: NOTIFICATION_SERVICE_URL not set');
+    return null;
+  }
+  if (!token) {
+    console.warn('sendNotification: INTERNAL_SERVICE_TOKEN/INTERNAL_TOKEN not set');
+    return null;
+  }
+  
+  const url = `${notifUrl.replace(/\/$/, '')}/internal/notifications`;
   try {
-    const url = `${NOTIF_SERVICE_URL.replace(/\/$/, "")}/internal/notifications`;
-    await axios.post(url, { receiptId, type, message }, { headers: { "x-internal-token": INTERNAL_TOKEN } });
-  } catch (e) {
-    console.error("Failed to send notification", e?.response?.data || e.message);
+    console.log('sendNotification: posting to', url, 'for receiptId:', receiptId, 'type:', type);
+    const resp = await axios.post(url, { receiptId, type, message }, { 
+      headers: { 'x-internal-token': token },
+      timeout: 5000
+    });
+    console.log('sendNotification: success', { status: resp.status });
+    return resp.data;
+  } catch (err) {
+    console.error('sendNotification: failed', {
+      url,
+      status: err?.response?.status,
+      data: err?.response?.data,
+      message: err?.message
+    });
+    return null;
   }
 }
 
@@ -55,31 +75,24 @@ function createAppointmentController({ appointmentSseBroadcaster }) {
         events: [{ type: "booked", detail: "Appointment scheduled" }],
       });
 
-      // Notify asynchronously (best-effort)
-      if (config.NOTIFICATION_SERVICE_URL) {
-        axios
-          .post(
-            `${config.NOTIFICATION_SERVICE_URL}/internal/appointment-booked`,
-            { appointmentId: appointment._id, patientId: req.user.sub, doctorId },
-            { headers: { "x-internal-token": config.INTERNAL_SERVICE_TOKEN } },
-          )
-          .catch(() => {});
+      // Notify patient about successful booking (asynchronously, best-effort)
+      try {
+        const patientId = appointment.patientId || req.user?.sub;
+        if (patientId) {
+          await sendNotification(
+            patientId,
+            'appointment_booked',
+            `Your appointment with doctor ${doctorId} has been scheduled for ${appointment.startAt || 'the selected time'}`
+          );
+        }
+      } catch (e) {
+        console.error('notify after booking failed', e);
       }
 
       appointmentSseBroadcaster?.publish(appointment._id, {
         status: appointment.status,
         appointmentId: appointment._id,
       });
-
-      // send notification to patient about successful booking
-      try {
-        const patientId = appointment?.patient || appointment?.patientId || req.user?.id || req.user?._id;
-        if (patientId) {
-          await sendNotification(patientId, "appointment_booked", `Your appointment on ${appointment.date || appointment.scheduledAt || 'scheduled time'} is confirmed.`);
-        }
-      } catch (e) {
-        console.error("notify after booking failed", e);
-      }
 
       return response.sendSuccess(res, {
         statusCode: 201,

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthcare-config
+  namespace: healthcare-system
+data:
+  MONGODB_URI: "mongodb://mongo:27017"
+  MONGODB_DB: "healthcare"
+  NODE_ENV: "production"
+  JWT_SECRET: "your-jwt-secret-change-in-prod"
+  INTERNAL_SERVICE_TOKEN: "your-internal-token-change-in-prod"
+  DOCTOR_SERVICE_URL: "http://doctor-service:3002"
+  APPOINTMENT_SERVICE_URL: "http://appointment-service:3003"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:3006"
+  PATIENT_SERVICE_URL: "http://patient-service:3001"
+  TELEMEDICINE_SERVICE_URL: "http://telemedicine-service:3004"
+  PAYMENT_SERVICE_URL: "http://payment-service:3005"

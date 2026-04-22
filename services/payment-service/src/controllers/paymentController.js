@@ -63,12 +63,13 @@ const initiatePayment = asyncHandler(async (req, res) => {
 
   // Send a well-formed JSON response directly to avoid relying on a wrapper that may send undefined
   return res.status(201).json({
+    success: true,
     message: "payment initiated",
     data: {
       paymentId: payment._id,
       status: payment.status,
       provider,
-      payhereData,
+      payhereData: payhereData || null,
     },
   });
 });
